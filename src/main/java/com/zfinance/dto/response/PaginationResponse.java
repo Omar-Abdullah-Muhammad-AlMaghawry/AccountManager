@@ -13,9 +13,9 @@ public class PaginationResponse<R> {
 
 	private String status;
 	private String message;
-	private int pageNumber;
-	private int pageSize;
-	private int totalRecords;
-	private int totalPages;
+	private Integer pageNumber;
+	private Integer pageSize;
+	private Integer totalRecords;
+	private Integer totalPages;
 	private List<R> records;
 }
