@@ -30,10 +30,10 @@ public class IssuerServiceImpl implements IssuerService {
 	public Issuer getIssuerById(String id) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("Authorization", "Bearer " + tokenAuthorizationFilter.getToken());
+		headers.set("Authorization", "TOKEN " + tokenAuthorizationFilter.getToken());
 		HttpEntity<Void> entity = new HttpEntity<>(null, headers);
 
-		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(SERVICES_URL + "/api/v1/issuer/getIssuerById")
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(SERVICES_URL + "/api/v1/issuers/getIssuerById")
 				.queryParam("id", id);
 
 		ResponseEntity<Issuer> response = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity,

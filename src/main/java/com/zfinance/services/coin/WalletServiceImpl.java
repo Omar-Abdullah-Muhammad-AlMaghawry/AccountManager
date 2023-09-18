@@ -39,7 +39,7 @@ public class WalletServiceImpl implements WalletService {
 		wallet.setType(walletBody.getType());
 
 		Issuer issuer = new Issuer();
-//		issuer = issuerService.getIssuerById(walletBody.getIssuerId());
+		issuer = issuerService.getIssuerById(walletBody.getIssuerId());
 		wallet.setIssuer(issuer);
 
 		return walletRepository.save(wallet);

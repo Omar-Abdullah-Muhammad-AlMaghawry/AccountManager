@@ -21,7 +21,7 @@ import com.zfinance.services.security.SecurityService;
 public class TokenAuthorizationFilter extends OncePerRequestFilter {
 
 	private final String AUTHORIZATION_HEADER = "Authorization";
-	private final String TOKEN_PREFIX = "Bearer ";
+	private final String TOKEN_PREFIX = "TOKEN ";
 	private String token;
 
 	@Autowired
