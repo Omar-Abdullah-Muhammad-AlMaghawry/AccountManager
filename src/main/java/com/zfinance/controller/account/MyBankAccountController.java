@@ -35,11 +35,11 @@ public class MyBankAccountController {
 
 		paginationResponse.setRecords(BankAccountMapper.INSTANCE.mapBankAccounts(bankAccounts));
 
+		paginationResponse.setTotalRecords(bankAccounts.size());
 		// TODO: to be edit
 		paginationResponse.setPageNumber(options.getPageNumber() != null ? Integer.valueOf(options.getPageNumber())
 				: null);
 		paginationResponse.setPageSize(options.getPageNumber() != null ? Integer.valueOf(options.getPageSize()) : null);
-
 		return paginationResponse;
 	}
 }

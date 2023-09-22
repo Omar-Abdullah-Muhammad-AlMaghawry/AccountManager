@@ -18,5 +18,7 @@ public interface WalletService {
 
 	public Wallet deleteWallet(String serial);
 
+	public List<Wallet> getWallets(String organizationId);
+
 	// TODO: THERE'RE STILL REST
 }

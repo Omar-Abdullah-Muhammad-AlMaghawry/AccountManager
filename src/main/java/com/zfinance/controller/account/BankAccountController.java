@@ -36,6 +36,7 @@ public class BankAccountController {
 		List<BankAccount> bankAccounts = bankAccountService.viewBankAccounts(options.getFilter(), options.getSort());
 
 		paginationResponse.setRecords(BankAccountMapper.INSTANCE.mapBankAccounts(bankAccounts));
+		paginationResponse.setTotalRecords(bankAccounts.size());
 
 		// TODO: to be edit
 		paginationResponse.setPageNumber(options.getPageNumber() != null ? Integer.valueOf(options.getPageNumber())

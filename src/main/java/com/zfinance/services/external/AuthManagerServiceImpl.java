@@ -12,13 +12,13 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.zfinance.config.filters.TokenAuthorizationFilter;
-import com.zfinance.orm.userdefinedtypes.exchangerates.CoinIssuer;
+import com.zfinance.dto.response.user.UserRecord;
 
 @Service
-public class IssuerServiceImpl implements IssuerService {
+public class AuthManagerServiceImpl implements AuthManagerService {
 
-	@Value("${services.url}")
-	private String SERVICES_URL;
+	@Value("${authmanager.url}")
+	private String AUTH_MANAGER_URL;
 
 	@Autowired
 	private RestTemplate restTemplate;
@@ -27,18 +27,19 @@ public class IssuerServiceImpl implements IssuerService {
 	private TokenAuthorizationFilter tokenAuthorizationFilter;
 
 	@Override
-	public CoinIssuer getIssuerById(String id) {
+	public UserRecord getUserIdFromToken(String token) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("Authorization", "TOKEN " + tokenAuthorizationFilter.getToken());
+		headers.set("Authorization", tokenAuthorizationFilter.getToken());
 		HttpEntity<Void> entity = new HttpEntity<>(null, headers);
 
-		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(SERVICES_URL + "/issuers/getIssuerById")
-				.queryParam("id", id);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(AUTH_MANAGER_URL + "/auth/getUserIdFromToken")
+				.queryParam("token", token);
 
-		ResponseEntity<CoinIssuer> response = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity,
-				CoinIssuer.class);
+		ResponseEntity<UserRecord> response = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity,
+				UserRecord.class);
 		return response.getBody();
+
 	}
 
 }

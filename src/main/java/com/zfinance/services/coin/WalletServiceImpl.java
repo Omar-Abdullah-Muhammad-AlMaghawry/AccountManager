@@ -7,12 +7,15 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.zfinance.config.filters.TokenAuthorizationFilter;
 import com.zfinance.dto.request.coin.UpdateWalletBody;
 import com.zfinance.dto.request.coin.WalletBody;
+import com.zfinance.dto.response.user.UserRecord;
 import com.zfinance.exceptions.DataNotFoundException;
 import com.zfinance.orm.coin.Wallet;
-import com.zfinance.orm.userdefinedtypes.exchangerates.Issuer;
+import com.zfinance.orm.userdefinedtypes.exchangerates.CoinIssuer;
 import com.zfinance.repositories.coin.WalletRepository;
+import com.zfinance.services.external.AuthManagerService;
 import com.zfinance.services.external.IssuerService;
 
 @Service
@@ -23,6 +26,12 @@ public class WalletServiceImpl implements WalletService {
 
 	@Autowired
 	private IssuerService issuerService;
+
+	@Autowired
+	private AuthManagerService authManagerService;
+
+	@Autowired
+	private TokenAuthorizationFilter tokenAuthorizationFilter;
 
 	@Override
 	public List<Wallet> getWallets() {
@@ -38,9 +47,15 @@ public class WalletServiceImpl implements WalletService {
 		wallet.setName(walletBody.getName());
 		wallet.setType(walletBody.getType());
 
-		Issuer issuer = new Issuer();
+		CoinIssuer issuer = new CoinIssuer();
 		issuer = issuerService.getIssuerById(walletBody.getIssuerId());
 		wallet.setIssuer(issuer);
+
+		String token = tokenAuthorizationFilter.getToken();
+		UserRecord user = authManagerService.getUserIdFromToken(token);
+		if (user.getMembers() != null && !user.getMembers().isEmpty() && user.getMembers().get(0)
+				.getOrganization() != null)
+			wallet.setOrganizationId(user.getMembers().get(0).getOrganization().getId());
 
 		return walletRepository.save(wallet);
 	}
@@ -85,6 +100,12 @@ public class WalletServiceImpl implements WalletService {
 		} else {
 			throw new DataNotFoundException(Wallet.class, serial);
 		}
+	}
+
+	@Override
+	public List<Wallet> getWallets(String organizationId) {
+		return walletRepository.findAllByOrganizationId(organizationId);
+
 	}
 
 }

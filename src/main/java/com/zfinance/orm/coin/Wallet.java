@@ -1,10 +1,13 @@
 package com.zfinance.orm.coin;
 
+import java.util.List;
+
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
-import com.zfinance.orm.userdefinedtypes.exchangerates.Issuer;
+import com.zfinance.orm.userdefinedtypes.exchangerates.CoinIssuer;
+import com.zfinance.orm.userdefinedtypes.smartcards.SmartCardShort;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,7 +42,10 @@ public class Wallet {
 	private Double creditLimit;
 
 	@Column("issuer")
-	private Issuer issuer;
+	private CoinIssuer issuer;
+
+	@Column("smart_cards")
+	private List<SmartCardShort> smartCards;
 
 	@Column("active")
 	private Boolean active;
@@ -49,4 +55,10 @@ public class Wallet {
 
 	@Column("main")
 	private Boolean main;
+
+	@Column("image")
+	private String image;
+
+	@Column("organization_id")
+	private String organizationId;
 }

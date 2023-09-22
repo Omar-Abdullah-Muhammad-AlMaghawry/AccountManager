@@ -12,8 +12,8 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
-@UserDefinedType("issuer_type")
-public class Issuer {
+@UserDefinedType("coin_issuer_type")
+public class CoinIssuer {
 
 	@Column("id")
 	private String id;
