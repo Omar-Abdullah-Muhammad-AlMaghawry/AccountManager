@@ -26,4 +26,11 @@ public class OrganizationController {
 		return coinsResponse;
 	}
 
+	@GetMapping("/{id}/provider-coins")
+	public CoinsResponse getProviderCoins(@PathVariable String id) {
+		CoinsResponse coinsResponse = new CoinsResponse();
+		coinsResponse.setCoins(CoinMapper.INSTANCE.mapWallets(walletService.getWallets(id)));
+		return coinsResponse;
+	}
+
 }
