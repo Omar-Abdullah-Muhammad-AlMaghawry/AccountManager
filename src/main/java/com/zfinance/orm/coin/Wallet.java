@@ -61,4 +61,7 @@ public class Wallet {
 
 	@Column("organization_id")
 	private String organizationId;
+
+	@Column("user_id")
+	private String userId;
 }

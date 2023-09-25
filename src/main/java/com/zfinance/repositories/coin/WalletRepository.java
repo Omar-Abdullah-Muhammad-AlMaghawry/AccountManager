@@ -12,4 +12,8 @@ public interface WalletRepository extends CassandraRepository<Wallet, String> {
 
 	@Query("SELECT * FROM zfin_wallet " + " WHERE organization_id = :p_organization_id " + " ALLOW FILTERING ")
 	List<Wallet> findAllByOrganizationId(@Param("p_organization_id") String organizationId);
+
+	@Query("SELECT * FROM zfin_wallet " + " WHERE user_id = :p_user_id " + " ALLOW FILTERING ")
+	List<Wallet> findAllByUserId(@Param("p_user_id") String userId);
+
 }

@@ -13,13 +13,13 @@ public class WalletRecord {
 
 	private String serial;
 	private String name;
-	private double amount;
-	private double availableAmount;
-	private double futureAmount;
-	private double heldAmount;
-	private double creditLimit;
+	private Double amount;
+	private Double availableAmount;
+	private Double futureAmount;
+	private Double heldAmount;
+	private Double creditLimit;
 	private CoinIssuer issuer;
-	private boolean active;
+	private Boolean active;
 	private String type;
-	private boolean main;
+	private Boolean main;
 }

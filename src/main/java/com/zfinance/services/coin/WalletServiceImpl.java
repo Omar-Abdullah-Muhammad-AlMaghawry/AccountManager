@@ -11,6 +11,7 @@ import com.zfinance.config.filters.TokenAuthorizationFilter;
 import com.zfinance.dto.request.coin.UpdateWalletBody;
 import com.zfinance.dto.request.coin.WalletBody;
 import com.zfinance.dto.response.user.UserRecord;
+import com.zfinance.exceptions.BusinessException;
 import com.zfinance.exceptions.DataNotFoundException;
 import com.zfinance.orm.coin.Wallet;
 import com.zfinance.orm.userdefinedtypes.exchangerates.CoinIssuer;
@@ -40,6 +41,13 @@ public class WalletServiceImpl implements WalletService {
 
 	@Override
 	public Wallet createWallet(WalletBody walletBody) {
+		String token = tokenAuthorizationFilter.getToken();
+		UserRecord user = authManagerService.getUserIdFromToken(token);
+
+		CoinIssuer issuerBody = issuerService.getIssuerById(walletBody.getIssuerId());
+
+		this.validateWallet(user, issuerBody);
+
 		Wallet wallet = new Wallet();
 		wallet.setSerial(UUID.randomUUID().toString());
 		wallet.setActive(true);
@@ -47,17 +55,23 @@ public class WalletServiceImpl implements WalletService {
 		wallet.setName(walletBody.getName());
 		wallet.setType(walletBody.getType());
 
-		CoinIssuer issuer = new CoinIssuer();
-		issuer = issuerService.getIssuerById(walletBody.getIssuerId());
-		wallet.setIssuer(issuer);
+		wallet.setIssuer(issuerBody);
 
-		String token = tokenAuthorizationFilter.getToken();
-		UserRecord user = authManagerService.getUserIdFromToken(token);
 		if (user.getMembers() != null && !user.getMembers().isEmpty() && user.getMembers().get(0)
 				.getOrganization() != null)
 			wallet.setOrganizationId(user.getMembers().get(0).getOrganization().getId());
 
+		wallet.setUserId(user.getId());
+
 		return walletRepository.save(wallet);
+	}
+
+	private void validateWallet(UserRecord user, CoinIssuer issuerBody) {
+		List<Wallet> wallets = walletRepository.findAllByUserId(user.getId());
+		for (Wallet userWallet : wallets) {
+			if (userWallet.getIssuer().getId().equals(issuerBody.getId()))
+				throw new BusinessException("error_alreadyHaveTheSameIssuer");
+		}
 	}
 
 	@Override
