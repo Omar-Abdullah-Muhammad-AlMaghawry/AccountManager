@@ -2,9 +2,9 @@ package com.zfinance.orm.coin;
 
 import java.util.List;
 
-import org.springframework.data.cassandra.core.mapping.Column;
-import org.springframework.data.cassandra.core.mapping.PrimaryKey;
-import org.springframework.data.cassandra.core.mapping.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.zfinance.orm.userdefinedtypes.exchangerates.CoinIssuer;
 import com.zfinance.orm.userdefinedtypes.smartcards.SmartCardShort;
@@ -16,52 +16,52 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table("zfin_wallet")
+@Document("zfin_wallet")
 public class Wallet {
 
-	@PrimaryKey
-	@Column("serial")
+	@Id
+	@Field("serial")
 	private String serial;
 
-	@Column("name")
+	@Field("name")
 	private String name;
 
-	@Column("amount")
+	@Field("amount")
 	private Double amount;
 
-	@Column("available_amount")
+	@Field("available_amount")
 	private Double availableAmount;
 
-	@Column("future_amount")
+	@Field("future_amount")
 	private Double futureAmount;
 
-	@Column("held_amount")
+	@Field("held_amount")
 	private Double heldAmount;
 
-	@Column("credit_limit")
+	@Field("credit_limit")
 	private Double creditLimit;
 
-	@Column("issuer")
+	@Field("issuer")
 	private CoinIssuer issuer;
 
-	@Column("smart_cards")
+	@Field("smart_cards")
 	private List<SmartCardShort> smartCards;
 
-	@Column("active")
+	@Field("active")
 	private Boolean active;
 
-	@Column("type")
+	@Field("type")
 	private String type;
 
-	@Column("main")
+	@Field("main")
 	private Boolean main;
 
-	@Column("image")
+	@Field("image")
 	private String image;
 
-	@Column("organization_id")
+	@Field("organization_id")
 	private String organizationId;
 
-	@Column("user_id")
+	@Field("user_id")
 	private String userId;
 }

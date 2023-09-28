@@ -1,7 +1,6 @@
 package com.zfinance.orm.userdefinedtypes.coin;
 
-import org.springframework.data.cassandra.core.mapping.Column;
-import org.springframework.data.cassandra.core.mapping.UserDefinedType;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,16 +11,15 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
-@UserDefinedType("contract_info_type")
 public class ContractInfo {
 
-	@Column("id")
+	@Field("id")
 	private String id;
 
-	@Column("person_type")
+	@Field("person_type")
 	private String personType;
 
-	@Column("name")
+	@Field("name")
 	private String name;
 
 }

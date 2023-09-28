@@ -1,7 +1,6 @@
 package com.zfinance.orm.userdefinedtypes.coin;
 
-import org.springframework.data.cassandra.core.mapping.Column;
-import org.springframework.data.cassandra.core.mapping.UserDefinedType;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,27 +11,26 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
-@UserDefinedType("wallet_owner_type")
 public class WalletOwner {
 
-	@Column("id")
+	@Field("id")
 	private String id;
 
-	@Column("status")
+	@Field("status")
 	private String status;
 
-	@Column("message")
+	@Field("message")
 	private String message;
 
-	@Column("type")
+	@Field("type")
 	private String type;
 
-	@Column("name")
+	@Field("name")
 	private String name;
 
-	@Column("identification_status")
+	@Field("identification_status")
 	private String identificationStatus;
 
-	@Column("contract_info")
+	@Field("contract_info")
 	private ContractInfo contractInfo;
 }

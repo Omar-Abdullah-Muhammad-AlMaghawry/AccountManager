@@ -2,9 +2,9 @@ package com.zfinance.orm.transaction;
 
 import java.util.List;
 
-import org.springframework.data.cassandra.core.mapping.Column;
-import org.springframework.data.cassandra.core.mapping.PrimaryKey;
-import org.springframework.data.cassandra.core.mapping.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.zfinance.orm.userdefinedtypes.transaction.ClientCoin;
 import com.zfinance.orm.userdefinedtypes.transaction.OperationAmountDetails;
@@ -21,94 +21,94 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table("zfin_transaction")
+@Document("zfin_transaction")
 public class Transaction {
 
-	@PrimaryKey
-	@Column("id")
+	@Id
+	@Field("id")
 	private String id;
 
-	@Column("net_amount")
+	@Field("net_amount")
 	private Double netAmount;
 
-	@Column("children")
+	@Field("children")
 	private List<TransactionType> children;
 
-	@Column("created_at")
+	@Field("created_at")
 	private String createdAt;
 
-	@Column("updated_at")
+	@Field("updated_at")
 	private String updatedAt;
 
-	@Column("description")
+	@Field("description")
 	private String description;
 
-	@Column("to")
+	@Field("to")
 	private Target to;
 
-	@Column("from")
+	@Field("from")
 	private Target from;
 
-	@Column("client_coin")
+	@Field("client_coin")
 	private ClientCoin clientCoin;
 
-	@Column("request_identifier")
+	@Field("request_identifier")
 	private Integer requestIdentifier;
 
-	@Column("request_status")
+	@Field("request_status")
 	private String requestStatus;
 
-	@Column("status")
+	@Field("status")
 	private String status;
 
-	@Column("pos_company_name")
+	@Field("pos_company_name")
 	private String posCompanyName;
 
-	@Column("category_image_link")
+	@Field("category_image_link")
 	private String categoryImageLink;
 
-	@Column("category_name")
+	@Field("category_name")
 	private String categoryName;
 
-	@Column("sender")
+	@Field("sender")
 	private SenderRecipient sender;
 
-	@Column("transactions")
+	@Field("transactions")
 	private List<TransactionsTransaction> transactions;
 
-	@Column("type")
+	@Field("type")
 	private String type;
 
-	@Column("amount")
+	@Field("amount")
 	private Double amount;
 
-	@Column("invoice_amount")
+	@Field("invoice_amount")
 	private Double invoiceAmount;
 
-	@Column("cash_amount")
+	@Field("cash_amount")
 	private Double cashAmount;
 
-	@Column("commission")
+	@Field("commission")
 	private Double commission;
 
-	@Column("coin")
+	@Field("coin")
 	private TransactionCoin coin;
 
-	@Column("incoming_amount")
+	@Field("incoming_amount")
 	private Double incomingAmount;
 
-	@Column("outgoing_amount")
+	@Field("outgoing_amount")
 	private Double outgoingAmount;
 
-	@Column("operation_amount_details")
+	@Field("operation_amount_details")
 	private OperationAmountDetails operationAmountDetails;
 
-	@Column("recipient")
+	@Field("recipient")
 	private SenderRecipient recipient;
 
-	@Column("merchant_coin_serial")
+	@Field("merchant_coin_serial")
 	private String merchantCoinSerial;
 
-	@Column("invoice_identifier")
+	@Field("invoice_identifier")
 	private String invoiceIdentifier;
 }

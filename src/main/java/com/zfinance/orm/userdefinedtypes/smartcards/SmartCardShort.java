@@ -1,7 +1,6 @@
 package com.zfinance.orm.userdefinedtypes.smartcards;
 
-import org.springframework.data.cassandra.core.mapping.Column;
-import org.springframework.data.cassandra.core.mapping.UserDefinedType;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.zfinance.enums.ExpirationStatusEnum;
 
@@ -12,25 +11,24 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
-@UserDefinedType("smart_card_short_type")
 public class SmartCardShort {
 
-	@Column("id")
+	@Field("id")
 	private String id;
 
-	@Column("name")
+	@Field("name")
 	private String name;
 
-	@Column("active")
+	@Field("active")
 	private Boolean active;
 
-	@Column("card_number")
+	@Field("card_number")
 	private String cardNumber;
 
-	@Column("expiration_date")
+	@Field("expiration_date")
 	private String expirationDate;
 
-	@Column("expiration_status")
+	@Field("expiration_status")
 	private ExpirationStatusEnum expirationStatus;
 
 }

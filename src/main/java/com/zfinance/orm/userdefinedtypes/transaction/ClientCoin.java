@@ -1,7 +1,6 @@
 package com.zfinance.orm.userdefinedtypes.transaction;
 
-import org.springframework.data.cassandra.core.mapping.Column;
-import org.springframework.data.cassandra.core.mapping.UserDefinedType;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.zfinance.orm.userdefinedtypes.exchangerates.CoinIssuer;
 
@@ -12,27 +11,26 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
-@UserDefinedType("client_coin_type")
 public class ClientCoin {
 
-	@Column("serial")
+	@Field("serial")
 	private String serial;
 
-	@Column("name")
+	@Field("name")
 	private String name;
 
-	@Column("organization_id")
+	@Field("organization_id")
 	private String organizationId;
 
-	@Column("organization_name")
+	@Field("organization_name")
 	private String organizationName;
 
-	@Column("technical")
+	@Field("technical")
 	private Boolean technical;
 
-	@Column("type")
+	@Field("type")
 	private String type;
 
-	@Column("issuer")
+	@Field("issuer")
 	private CoinIssuer issuer;
 }

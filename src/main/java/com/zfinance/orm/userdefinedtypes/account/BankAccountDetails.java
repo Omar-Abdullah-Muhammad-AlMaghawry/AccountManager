@@ -1,7 +1,6 @@
 package com.zfinance.orm.userdefinedtypes.account;
 
-import org.springframework.data.cassandra.core.mapping.Column;
-import org.springframework.data.cassandra.core.mapping.UserDefinedType;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,27 +9,26 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
-@UserDefinedType("bank_account_type")
 public class BankAccountDetails {
 
-	@Column("bank_account_number")
+	@Field("bank_account_number")
 	private String bankAccountNumber;
 
-	@Column("address")
+	@Field("address")
 	private String address;
 
-	@Column("bic")
+	@Field("bic")
 	private String bic;
 
-	@Column("full_name")
+	@Field("full_name")
 	private String fullName;
 
-	@Column("iban")
+	@Field("iban")
 	private String iban;
 
-	@Column("name")
+	@Field("name")
 	private String name;
 
-	@Column("swift")
+	@Field("swift")
 	private String swift;
 }

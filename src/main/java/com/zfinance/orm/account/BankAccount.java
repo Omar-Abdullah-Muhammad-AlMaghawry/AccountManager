@@ -1,8 +1,8 @@
 package com.zfinance.orm.account;
 
-import org.springframework.data.cassandra.core.mapping.Column;
-import org.springframework.data.cassandra.core.mapping.PrimaryKey;
-import org.springframework.data.cassandra.core.mapping.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.zfinance.orm.userdefinedtypes.account.BankAccountDetails;
 
@@ -13,25 +13,25 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table("zfin_bank_account")
+@Document("zfin_bank_account")
 public class BankAccount {
 
-	@PrimaryKey
-	@Column("id")
+	@Id
+	@Field("id")
 	private String id;
 
-	@Column("created_at")
+	@Field("created_at")
 	private String createdAt;
 
-	@Column("details")
+	@Field("details")
 	private BankAccountDetails details;
 
-	@Column("status")
+	@Field("status")
 	private String status;
 
-	@Column("updated_at")
+	@Field("updated_at")
 	private String updatedAt;
 
-	@Column("user_id")
+	@Field("user_id")
 	private String userId;
 }
