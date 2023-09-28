@@ -18,4 +18,6 @@ public interface BankAccountService {
 
 	public void rejectBankAccount(String bankAccountId);
 
+	public BankAccount save(BankAccount bankAccount);
+
 }

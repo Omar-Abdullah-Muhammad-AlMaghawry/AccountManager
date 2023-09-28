@@ -54,4 +54,10 @@ public class TransactionController {
 		return transactionResponse;
 	}
 
+	@PostMapping("/save")
+	public TransactionsRecord saveTransactions(@RequestBody TransactionsRecord transactionsRecord) {
+		return TransactionMapper.INSTANCE.mapTransaction(transactionService.save(TransactionMapper.INSTANCE
+				.mapTransactionsRecord(transactionsRecord)));
+	}
+
 }

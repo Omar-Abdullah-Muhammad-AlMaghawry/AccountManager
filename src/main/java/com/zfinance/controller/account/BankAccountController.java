@@ -55,4 +55,10 @@ public class BankAccountController {
 	public void rejectBankAccount(@PathVariable String bankAccountId) {
 		bankAccountService.rejectBankAccount(bankAccountId);
 	}
+
+	@PostMapping("/save")
+	public BankAccountRecord saveBankAccount(@RequestBody BankAccountRecord bankAccountRecord) {
+		return BankAccountMapper.INSTANCE.mapBankAccount(bankAccountService.save(BankAccountMapper.INSTANCE
+				.mapBankAccountRecord(bankAccountRecord)));
+	}
 }

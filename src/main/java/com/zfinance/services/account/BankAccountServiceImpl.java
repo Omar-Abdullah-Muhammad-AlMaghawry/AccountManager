@@ -164,4 +164,9 @@ public class BankAccountServiceImpl implements BankAccountService {
 		}
 	}
 
+	@Override
+	public BankAccount save(BankAccount bankAccount) {
+		return bankAccountRepository.save(bankAccount);
+	}
+
 }
