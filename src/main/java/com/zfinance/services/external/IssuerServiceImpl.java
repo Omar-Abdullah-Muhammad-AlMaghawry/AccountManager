@@ -41,4 +41,19 @@ public class IssuerServiceImpl implements IssuerService {
 		return response.getBody();
 	}
 
+	@Override
+	public CoinIssuer getIssuerByCurrencyCode(String code) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "TOKEN " + tokenAuthorizationFilter.getToken());
+		HttpEntity<Void> entity = new HttpEntity<>(null, headers);
+
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(SERVICES_URL
+				+ "/issuers/getIssuerByCurrencyCode").queryParam("code", code);
+
+		ResponseEntity<CoinIssuer> response = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity,
+				CoinIssuer.class);
+		return response.getBody();
+	}
+
 }

@@ -1,5 +1,6 @@
 package com.zfinance.services.transaction;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,7 +15,9 @@ import com.zfinance.dto.request.transaction.TransactionsFilter;
 import com.zfinance.dto.request.transaction.TransactionsSort;
 import com.zfinance.exceptions.DataNotFoundException;
 import com.zfinance.orm.transaction.Transaction;
+import com.zfinance.orm.userdefinedtypes.exchangerates.CoinIssuer;
 import com.zfinance.repositories.transaction.TransactionRepository;
+import com.zfinance.services.external.IssuerService;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -24,6 +27,9 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Autowired
 	private TransactionRepository transactionRepository;
+
+	@Autowired
+	private IssuerService issuerService;
 
 	@Override
 	public List<Transaction> getRecords(TransactionsFilter transactionsFilter, TransactionsSort transactionsSort) {
@@ -63,7 +69,12 @@ public class TransactionServiceImpl implements TransactionService {
 				criteria.and("from.issuer.serial").in(transactionsFilter.getIssuerIds());
 			}
 			if (transactionsFilter.getCurrencyCodes() != null && !transactionsFilter.getCurrencyCodes().isEmpty()) {
-				criteria.and("coin.name").in(transactionsFilter.getCurrencyCodes());
+				List<String> currencySymbols = new ArrayList<>();
+				for (String currencyCode : transactionsFilter.getCurrencyCodes()) {
+					CoinIssuer coinIssuer = issuerService.getIssuerByCurrencyCode(currencyCode);
+					currencySymbols.add(coinIssuer.getSymbol());
+				}
+				criteria.and("coin.issuer.symbol").in(currencySymbols);
 			}
 			if (transactionsFilter.getRequestIdentifiers() != null && !transactionsFilter.getRequestIdentifiers()
 					.isEmpty()) {
@@ -90,13 +101,25 @@ public class TransactionServiceImpl implements TransactionService {
 		// Apply sorting
 		if (transactionsSort != null) {
 			if (transactionsSort.getCreatedAt() != null) {
-				query.with(Sort.by(Sort.Order.asc("createdAt")));
+				if (transactionsSort.getCreatedAt().equalsIgnoreCase("asc")) {
+					query.with(Sort.by(Sort.Order.asc("createdAt")));
+				} else if (transactionsSort.getCreatedAt().equalsIgnoreCase("desc")) {
+					query.with(Sort.by(Sort.Order.desc("createdAt")));
+				}
 			}
 			if (transactionsSort.getStatus() != null) {
-				query.with(Sort.by(Sort.Order.asc("status")));
+				if (transactionsSort.getStatus().equalsIgnoreCase("asc")) {
+					query.with(Sort.by(Sort.Order.asc("status")));
+				} else if (transactionsSort.getStatus().equalsIgnoreCase("desc")) {
+					query.with(Sort.by(Sort.Order.desc("status")));
+				}
 			}
 			if (transactionsSort.getType() != null) {
-				query.with(Sort.by(Sort.Order.asc("type")));
+				if (transactionsSort.getType().equalsIgnoreCase("asc")) {
+					query.with(Sort.by(Sort.Order.asc("type")));
+				} else if (transactionsSort.getType().equalsIgnoreCase("desc")) {
+					query.with(Sort.by(Sort.Order.desc("type")));
+				}
 			}
 		}
 

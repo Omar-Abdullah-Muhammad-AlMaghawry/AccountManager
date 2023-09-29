@@ -117,8 +117,14 @@ public class WalletServiceImpl implements WalletService {
 	}
 
 	@Override
-	public List<Wallet> getWallets(String organizationId) {
-		return walletRepository.findAllByOrganizationId(organizationId);
+	public List<Wallet> getWalletsByUserId(String userId) {
+		return walletRepository.findAllByUserId(userId);
+
+	}
+
+	@Override
+	public List<Wallet> getWalletsByOrganizationId(String organizationId) {
+		return walletRepository.findAllByUserId(organizationId);
 
 	}
 

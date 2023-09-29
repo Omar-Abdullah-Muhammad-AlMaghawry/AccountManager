@@ -6,4 +6,6 @@ public interface IssuerService {
 
 	public CoinIssuer getIssuerById(String id);
 
+	public CoinIssuer getIssuerByCurrencyCode(String code);
+
 }
