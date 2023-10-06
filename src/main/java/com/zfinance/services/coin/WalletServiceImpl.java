@@ -128,4 +128,10 @@ public class WalletServiceImpl implements WalletService {
 
 	}
 
+	@Override
+	public Wallet getWalletById(String id) {
+		return walletRepository.findById(id)
+				.orElseThrow(()-> new BusinessException("no wallet with id "+id));
+	}
+
 }

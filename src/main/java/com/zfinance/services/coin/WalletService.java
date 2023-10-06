@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.zfinance.dto.request.coin.UpdateWalletBody;
 import com.zfinance.dto.request.coin.WalletBody;
+import com.zfinance.dto.response.coin.WalletRecord;
 import com.zfinance.orm.coin.Wallet;
 
 public interface WalletService {
@@ -22,5 +23,6 @@ public interface WalletService {
 
 	public List<Wallet> getWalletsByOrganizationId(String organizationId);
 
-	// TODO: THERE'RE STILL REST
+	Wallet getWalletById(String id);
+
 }
