@@ -1,6 +1,7 @@
 package com.zfinance.orm.account;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -34,4 +35,7 @@ public class BankAccount {
 
 	@Field("user_id")
 	private String userId;
+
+	@Transient
+	public static final String SEQUENCE_NAME = "bank_account_sequence";
 }

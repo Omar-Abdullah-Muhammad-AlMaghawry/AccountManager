@@ -42,7 +42,7 @@ public class WalletServiceImpl implements WalletService {
 	@Override
 	public Wallet createWallet(WalletBody walletBody) {
 		String token = tokenAuthorizationFilter.getToken();
-		UserRecord user = authManagerService.getUserIdFromToken(token);
+		UserRecord user = authManagerService.getUserFromToken(token);
 
 		CoinIssuer issuerBody = issuerService.getIssuerById(walletBody.getIssuerId());
 

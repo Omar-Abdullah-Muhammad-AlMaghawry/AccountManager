@@ -17,8 +17,8 @@ public class UserRecord {
 	private String id;
 	private String name;
 	private String createdAt;
-	private boolean active;
-	private boolean banned;
+	private Boolean active;
+	private Boolean banned;
 	private String banExpiryDate;
 	private UserContact contact;
 	private List<UserMemberRecord> members;

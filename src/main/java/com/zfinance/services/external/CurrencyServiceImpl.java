@@ -12,13 +12,13 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.zfinance.config.filters.TokenAuthorizationFilter;
-import com.zfinance.dto.response.user.UserRecord;
+import com.zfinance.dto.response.external.currency.Currency;
 
 @Service
-public class AuthManagerServiceImpl implements AuthManagerService {
+public class CurrencyServiceImpl implements CurrencyService {
 
-	@Value("${authmanager.url}")
-	private String AUTH_MANAGER_URL;
+	@Value("${services.url}")
+	private String SERVICES_URL;
 
 	@Autowired
 	private RestTemplate restTemplate;
@@ -27,19 +27,18 @@ public class AuthManagerServiceImpl implements AuthManagerService {
 	private TokenAuthorizationFilter tokenAuthorizationFilter;
 
 	@Override
-	public UserRecord getUserFromToken(String token) {
+	public Currency getCurrencyByCode(String code) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("Authorization", tokenAuthorizationFilter.getToken());
+		headers.set("Authorization", "TOKEN " + tokenAuthorizationFilter.getToken());
 		HttpEntity<Void> entity = new HttpEntity<>(null, headers);
 
-		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(AUTH_MANAGER_URL + "/auth/getUserFromToken")
-				.queryParam("token", token);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(SERVICES_URL + "/currencies/getCurrencyByCode")
+				.queryParam("code", code);
 
-		ResponseEntity<UserRecord> response = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity,
-				UserRecord.class);
+		ResponseEntity<Currency> response = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity,
+				Currency.class);
 		return response.getBody();
-
 	}
 
 }

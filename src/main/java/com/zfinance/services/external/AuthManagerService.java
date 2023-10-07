@@ -4,6 +4,6 @@ import com.zfinance.dto.response.user.UserRecord;
 
 public interface AuthManagerService {
 
-	public UserRecord getUserIdFromToken(String token);
+	public UserRecord getUserFromToken(String token);
 
 }

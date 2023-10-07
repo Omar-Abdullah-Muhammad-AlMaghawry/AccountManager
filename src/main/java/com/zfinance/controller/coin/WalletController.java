@@ -11,12 +11,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.zfinance.config.filters.TokenAuthorizationFilter;
 import com.zfinance.dto.request.coin.UpdateWalletBody;
 import com.zfinance.dto.request.coin.WalletBody;
 import com.zfinance.dto.response.coin.GetWalletResponse;
 import com.zfinance.dto.response.coin.WalletRecord;
+import com.zfinance.dto.response.user.UserRecord;
 import com.zfinance.mapper.WalletMapper;
 import com.zfinance.services.coin.WalletService;
+import com.zfinance.services.external.AuthManagerService;
 
 @RestController
 @RequestMapping("/coins")
@@ -26,10 +29,25 @@ public class WalletController {
 	@Autowired
 	private WalletService walletService;
 
+	@Autowired
+	private AuthManagerService authManagerService;
+
+	@Autowired
+	private TokenAuthorizationFilter tokenAuthorizationFilter;
+
 	@GetMapping
 	public GetWalletResponse getWallets() {
 		GetWalletResponse getWalletResponse = new GetWalletResponse();
 		getWalletResponse.setCoins(WalletMapper.INSTANCE.mapWallets(walletService.getWallets()));
+		return getWalletResponse;
+	}
+
+	@GetMapping("/signedIn")
+	public GetWalletResponse getSignedInWallets() {
+		String token = tokenAuthorizationFilter.getToken();
+		UserRecord user = authManagerService.getUserFromToken(token);
+		GetWalletResponse getWalletResponse = new GetWalletResponse();
+		getWalletResponse.setCoins(WalletMapper.INSTANCE.mapWallets(walletService.getWalletsByUserId(user.getId())));
 		return getWalletResponse;
 	}
 
