@@ -175,7 +175,7 @@ public class ContractController {
 
 	@PatchMapping("/{contractId}/commission-profiles/{profileId}/commission-rule/{ruleId}")
 	public CommissionRuleListResponse updateCommissionRule(@PathVariable String contractId,
-			@PathVariable String profileId, @RequestBody String ruleId, CommissionRulePayload commissionRulePayload) {
+			@PathVariable String profileId, @PathVariable String ruleId, CommissionRulePayload commissionRulePayload) {
 		return new CommissionRuleListResponse(CommissionRuleMapper.INSTANCE.mapCommissionRules(contractService
 				.updateCommissionRule(contractId, profileId, ruleId, commissionRulePayload)));
 
