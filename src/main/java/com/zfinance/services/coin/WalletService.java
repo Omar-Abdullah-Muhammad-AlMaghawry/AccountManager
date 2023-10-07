@@ -22,5 +22,8 @@ public interface WalletService {
 
 	public List<Wallet> getWalletsByOrganizationId(String organizationId);
 
+	public Wallet getWalletById(String id);
+
 	// TODO: THERE'RE STILL REST
+
 }

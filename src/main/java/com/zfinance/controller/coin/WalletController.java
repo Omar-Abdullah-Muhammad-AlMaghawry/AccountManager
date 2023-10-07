@@ -51,6 +51,11 @@ public class WalletController {
 		return getWalletResponse;
 	}
 
+	@GetMapping("/{id}")
+	public WalletRecord getWalletsById(@PathVariable(name = "id") String id) {
+		return WalletMapper.INSTANCE.mapWallet(walletService.getWalletById(id));
+	}
+
 	@PostMapping
 	public WalletRecord createWallet(@RequestBody WalletBody walletBody) {
 		return WalletMapper.INSTANCE.mapWallet(walletService.createWallet(walletBody));
