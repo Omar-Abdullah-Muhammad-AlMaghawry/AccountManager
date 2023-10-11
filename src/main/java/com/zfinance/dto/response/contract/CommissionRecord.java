@@ -1,10 +1,10 @@
 package com.zfinance.dto.response.contract;
 
 import com.zfinance.orm.userdefinedtypes.contract.CommissionDestParticipantSpecification;
-import com.zfinance.orm.userdefinedtypes.contract.CommissionFlow;
 import com.zfinance.orm.userdefinedtypes.contract.CommissionIssuer;
 import com.zfinance.orm.userdefinedtypes.contract.CommissionSrcParticipantSpecification;
 import com.zfinance.orm.userdefinedtypes.contract.CommissionValue;
+import com.zfinance.orm.userdefinedtypes.contract.OperationFlow;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,7 +21,7 @@ public class CommissionRecord {
 	private String updatedAt;
 	private CommissionDestParticipantSpecification destParticipantSpecification;
 	private String direction;
-	private CommissionFlow flow;
+	private OperationFlow flow;
 	private CommissionIssuer issuer;
 	private CommissionSrcParticipantSpecification srcParticipantSpecification;
 	private CommissionValue value;
