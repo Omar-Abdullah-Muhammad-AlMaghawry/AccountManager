@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
-public class CommissionFlow {
+public class OperationFlow {
 
 	@Field("id")
 	private String id;

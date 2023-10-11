@@ -41,7 +41,7 @@ public class BankAccountController {
 		// TODO: to be edit
 		paginationResponse.setPageNumber(options.getPageNumber() != null ? Integer.valueOf(options.getPageNumber())
 				: null);
-		paginationResponse.setPageSize(options.getPageNumber() != null ? Integer.valueOf(options.getPageSize()) : null);
+		paginationResponse.setPageSize(options.getPageSize() != null ? Integer.valueOf(options.getPageSize()) : null);
 
 		return paginationResponse;
 	}

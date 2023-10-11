@@ -6,10 +6,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.zfinance.orm.userdefinedtypes.contract.CommissionDestParticipantSpecification;
-import com.zfinance.orm.userdefinedtypes.contract.CommissionFlow;
 import com.zfinance.orm.userdefinedtypes.contract.CommissionIssuer;
 import com.zfinance.orm.userdefinedtypes.contract.CommissionSrcParticipantSpecification;
 import com.zfinance.orm.userdefinedtypes.contract.CommissionValue;
+import com.zfinance.orm.userdefinedtypes.contract.OperationFlow;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,7 +41,7 @@ public class Commission {
 	private String direction;
 
 	@Field("flow")
-	private CommissionFlow flow;
+	private OperationFlow flow;
 
 	@Field("issuer")
 	private CommissionIssuer issuer;

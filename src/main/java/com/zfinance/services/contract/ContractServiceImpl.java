@@ -43,6 +43,7 @@ import com.zfinance.orm.contract.Limit;
 import com.zfinance.orm.contract.Provider;
 import com.zfinance.orm.userdefinedtypes.contract.CommissionIssuer;
 import com.zfinance.orm.userdefinedtypes.contract.CommissionRuleCondition;
+import com.zfinance.orm.userdefinedtypes.contract.OperationFlow;
 import com.zfinance.orm.userdefinedtypes.contract.ProviderCurrency;
 import com.zfinance.orm.userdefinedtypes.exchangerates.CoinIssuer;
 import com.zfinance.orm.userdefinedtypes.user.UserContractInfo;
@@ -56,6 +57,7 @@ import com.zfinance.repositories.contract.ProviderRepository;
 import com.zfinance.services.database.sequence.SequenceGeneratorService;
 import com.zfinance.services.external.CurrencyService;
 import com.zfinance.services.external.IssuerService;
+import com.zfinance.services.external.OperationFlowService;
 import com.zfinance.services.external.UserService;
 
 @Service
@@ -90,6 +92,9 @@ public class ContractServiceImpl implements ContractService {
 
 	@Autowired
 	private IssuerService issuerService;
+
+	@Autowired
+	private OperationFlowService operationFlowService;
 
 	@Autowired
 	private UserService userService;
@@ -276,13 +281,11 @@ public class ContractServiceImpl implements ContractService {
 		provider.setProviderCurrency(providerCurrency);
 
 		// TODO: what's gate provider
-		if (providerCreateBody.getGateProviderId() == null) {
-			provider.setCreatedAt((new Date()).toString());
-			provider.setId(sequenceGeneratorService.generateSequence(Provider.SEQUENCE_NAME));
-		} else {
-			provider.setUpdatedAt((new Date()).toString());
-			provider.setId(providerCreateBody.getGateProviderId());
-		}
+		provider.setGateProviderId(providerCreateBody.getGateProviderId());
+
+		provider.setCreatedAt((new Date()).toString());
+		provider.setId(sequenceGeneratorService.generateSequence(Provider.SEQUENCE_NAME));
+
 		providerRepository.save(provider);
 		return providerRepository.findByContractId(contractId);
 	}
@@ -477,8 +480,8 @@ public class ContractServiceImpl implements ContractService {
 		// TODO: after making Catalog Request, make the same for flow after making a
 		// table for it (OperationFlowRecord)
 
-//		OperationFlow flow = operationFlowService.getOperationFlowById(createSystemCommission.getOperationFlowId());
-//		commission.setFlow(flow);
+		OperationFlow flow = operationFlowService.getOperationFlowById(createSystemCommission.getOperationFlowId());
+		commission.setFlow(flow);
 
 		commission.setId(sequenceGeneratorService.generateSequence(Commission.SEQUENCE_NAME));
 
@@ -512,8 +515,9 @@ public class ContractServiceImpl implements ContractService {
 		// TODO: after making Catalog Request, make the same for flow after making a
 		// table for it (OperationFlowRecord)
 
-//		OperationFlow flow = operationFlowService.getOperationFlowById(createSystemCommission.getOperationFlowId());
-//		commission.setFlow(flow);
+		OperationFlow flow = operationFlowService.getOperationFlowById(createMultiCurrencySystemCommission
+				.getOperationFlowId());
+		commission.setFlow(flow);
 
 		commission.setId(sequenceGeneratorService.generateSequence(Commission.SEQUENCE_NAME));
 
