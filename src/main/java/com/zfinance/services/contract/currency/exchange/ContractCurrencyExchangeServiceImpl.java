@@ -13,6 +13,7 @@ import com.zfinance.exceptions.DataNotFoundException;
 import com.zfinance.orm.coin.Wallet;
 import com.zfinance.orm.contract.currency.exchange.ContractCurrencyExchange;
 import com.zfinance.repositories.contract.currency.exchange.ContractCurrencyExchangeRepository;
+import com.zfinance.services.database.sequence.SequenceGeneratorService;
 
 @Service
 public class ContractCurrencyExchangeServiceImpl implements ContractCurrencyExchangeService {
@@ -23,17 +24,21 @@ public class ContractCurrencyExchangeServiceImpl implements ContractCurrencyExch
 	@Autowired
 	private ContractCurrencyExchangeRepository contractCurrencyExchangeRepository;
 
+	@Autowired
+	private SequenceGeneratorService sequenceGeneratorService;
+
 	@Override
 	public List<ContractCurrencyExchange> searchContractCurrencyExchanges(
 			ContractCurrencyExchangeFilter contractCurrencyExchangeFilter) {
 
 		Criteria criteria = new Criteria();
-
+		Criteria regex = null;
 		// Add contractCurrencyExchangeFilter criteria based on the
 		// contractCurrencyExchangeFilter object
 		if (contractCurrencyExchangeFilter != null) {
 			if (contractCurrencyExchangeFilter.getType() != null) {
-				criteria.and("type").is(contractCurrencyExchangeFilter.getType());
+				regex = Criteria.where("type").regex(contractCurrencyExchangeFilter.getType(), "i");
+//				criteria.and("type").is(contractCurrencyExchangeFilter.getType());
 			}
 			if (contractCurrencyExchangeFilter.getStartDate() != null) {
 				// Add date range criteria if needed
@@ -50,6 +55,9 @@ public class ContractCurrencyExchangeServiceImpl implements ContractCurrencyExch
 		}
 
 		Query query = new Query(criteria);
+
+		if (regex != null)
+			query.addCriteria(regex);
 
 		// Apply sorting if needed
 		// query.with(Sort.by(Sort.Order.asc("fieldName")));
@@ -71,6 +79,10 @@ public class ContractCurrencyExchangeServiceImpl implements ContractCurrencyExch
 
 	@Override
 	public ContractCurrencyExchange saveContractCurrencyExchange(ContractCurrencyExchange contractCurrencyExchange) {
+		if (contractCurrencyExchange != null && contractCurrencyExchange.getId() == null)
+			contractCurrencyExchange.setId(sequenceGeneratorService.generateSequence(
+					ContractCurrencyExchange.SEQUENCE_NAME));
+
 		return contractCurrencyExchangeRepository.save(contractCurrencyExchange);
 	}
 
