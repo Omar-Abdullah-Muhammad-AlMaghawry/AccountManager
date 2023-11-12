@@ -1,11 +1,11 @@
 package com.zfinance.services.external;
 
-import com.zfinance.orm.userdefinedtypes.exchangerates.CoinIssuer;
+import com.zfinance.orm.userdefinedtypes.exchange.rates.Issuer;
 
 public interface IssuerService {
 
-	public CoinIssuer getIssuerById(String id);
+	public Issuer getIssuerById(String id);
 
-	public CoinIssuer getIssuerByCurrencyCode(String code);
+	public Issuer getIssuerByCurrencyCode(String code);
 
 }

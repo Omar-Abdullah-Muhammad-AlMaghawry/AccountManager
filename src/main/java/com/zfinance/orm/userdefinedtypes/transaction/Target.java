@@ -2,7 +2,7 @@ package com.zfinance.orm.userdefinedtypes.transaction;
 
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import com.zfinance.orm.userdefinedtypes.exchangerates.CoinIssuer;
+import com.zfinance.orm.userdefinedtypes.exchange.rates.Issuer;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +19,7 @@ public class Target {
 	private String serial;
 
 	@Field("issuer")
-	private CoinIssuer issuer;
+	private Issuer issuer;
 
 	@Field("name")
 	private String name;

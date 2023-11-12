@@ -15,7 +15,7 @@ import com.zfinance.dto.request.transaction.TransactionsFilter;
 import com.zfinance.dto.request.transaction.TransactionsSort;
 import com.zfinance.exceptions.DataNotFoundException;
 import com.zfinance.orm.transaction.Transaction;
-import com.zfinance.orm.userdefinedtypes.exchangerates.CoinIssuer;
+import com.zfinance.orm.userdefinedtypes.exchange.rates.Issuer;
 import com.zfinance.repositories.transaction.TransactionRepository;
 import com.zfinance.services.external.IssuerService;
 
@@ -71,7 +71,7 @@ public class TransactionServiceImpl implements TransactionService {
 			if (transactionsFilter.getCurrencyCodes() != null && !transactionsFilter.getCurrencyCodes().isEmpty()) {
 				List<String> currencySymbols = new ArrayList<>();
 				for (String currencyCode : transactionsFilter.getCurrencyCodes()) {
-					CoinIssuer coinIssuer = issuerService.getIssuerByCurrencyCode(currencyCode);
+					Issuer coinIssuer = issuerService.getIssuerByCurrencyCode(currencyCode);
 					currencySymbols.add(coinIssuer.getSymbol());
 				}
 				criteria.and("coin.issuer.symbol").in(currencySymbols);

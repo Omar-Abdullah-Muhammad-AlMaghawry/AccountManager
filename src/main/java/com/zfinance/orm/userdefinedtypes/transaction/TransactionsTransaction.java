@@ -2,7 +2,7 @@ package com.zfinance.orm.userdefinedtypes.transaction;
 
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import com.zfinance.orm.userdefinedtypes.exchangerates.CoinIssuer;
+import com.zfinance.orm.userdefinedtypes.exchange.rates.Issuer;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,7 +28,7 @@ public class TransactionsTransaction {
 	private Target from;
 
 	@Field("issuer")
-	private CoinIssuer issuer;
+	private Issuer issuer;
 
 	@Field("performed_at")
 	private String performedAt;

@@ -1,6 +1,6 @@
 package com.zfinance.dto.response.coin;
 
-import com.zfinance.orm.userdefinedtypes.exchangerates.CoinIssuer;
+import com.zfinance.orm.userdefinedtypes.exchange.rates.Issuer;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +18,7 @@ public class WalletRecord {
 	private Double futureAmount;
 	private Double heldAmount;
 	private Double creditLimit;
-	private CoinIssuer issuer;
+	private Issuer issuer;
 	private Boolean active;
 	private String type;
 	private Boolean main;

@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.zfinance.config.filters.TokenAuthorizationFilter;
-import com.zfinance.orm.userdefinedtypes.exchangerates.CoinIssuer;
+import com.zfinance.orm.userdefinedtypes.exchange.rates.Issuer;
 
 @Service
 public class IssuerServiceImpl implements IssuerService {
@@ -27,7 +27,7 @@ public class IssuerServiceImpl implements IssuerService {
 	private TokenAuthorizationFilter tokenAuthorizationFilter;
 
 	@Override
-	public CoinIssuer getIssuerById(String id) {
+	public Issuer getIssuerById(String id) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("Authorization", "TOKEN " + tokenAuthorizationFilter.getToken());
@@ -36,13 +36,13 @@ public class IssuerServiceImpl implements IssuerService {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(SERVICES_URL + "/issuers/getIssuerById")
 				.queryParam("id", id);
 
-		ResponseEntity<CoinIssuer> response = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity,
-				CoinIssuer.class);
+		ResponseEntity<Issuer> response = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity,
+				Issuer.class);
 		return response.getBody();
 	}
 
 	@Override
-	public CoinIssuer getIssuerByCurrencyCode(String code) {
+	public Issuer getIssuerByCurrencyCode(String code) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("Authorization", "TOKEN " + tokenAuthorizationFilter.getToken());
@@ -51,8 +51,8 @@ public class IssuerServiceImpl implements IssuerService {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(SERVICES_URL
 				+ "/issuers/getIssuerByCurrencyCode").queryParam("code", code);
 
-		ResponseEntity<CoinIssuer> response = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity,
-				CoinIssuer.class);
+		ResponseEntity<Issuer> response = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity,
+				Issuer.class);
 		return response.getBody();
 	}
 

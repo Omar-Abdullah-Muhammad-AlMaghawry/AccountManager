@@ -14,8 +14,9 @@ import com.zfinance.dto.response.user.UserRecord;
 import com.zfinance.exceptions.BusinessException;
 import com.zfinance.exceptions.DataNotFoundException;
 import com.zfinance.orm.coin.Wallet;
-import com.zfinance.orm.userdefinedtypes.exchangerates.CoinIssuer;
+import com.zfinance.orm.userdefinedtypes.exchange.rates.Issuer;
 import com.zfinance.repositories.coin.WalletRepository;
+import com.zfinance.services.database.sequence.SequenceGeneratorService;
 import com.zfinance.services.external.AuthManagerService;
 import com.zfinance.services.external.IssuerService;
 
@@ -34,6 +35,9 @@ public class WalletServiceImpl implements WalletService {
 	@Autowired
 	private TokenAuthorizationFilter tokenAuthorizationFilter;
 
+	@Autowired
+	private SequenceGeneratorService sequenceGeneratorService;
+
 	@Override
 	public List<Wallet> getWallets() {
 		return walletRepository.findAll();
@@ -44,7 +48,7 @@ public class WalletServiceImpl implements WalletService {
 		String token = tokenAuthorizationFilter.getToken();
 		UserRecord user = authManagerService.getUserFromToken(token);
 
-		CoinIssuer issuerBody = issuerService.getIssuerById(walletBody.getIssuerId());
+		Issuer issuerBody = issuerService.getIssuerById(walletBody.getIssuerId());
 
 		this.validateWallet(user, issuerBody);
 
@@ -66,7 +70,7 @@ public class WalletServiceImpl implements WalletService {
 		return walletRepository.save(wallet);
 	}
 
-	private void validateWallet(UserRecord user, CoinIssuer issuerBody) {
+	private void validateWallet(UserRecord user, Issuer issuerBody) {
 		List<Wallet> wallets = walletRepository.findAllByUserId(user.getId());
 		for (Wallet userWallet : wallets) {
 			if (userWallet.getIssuer().getId().equals(issuerBody.getId()))
@@ -131,6 +135,13 @@ public class WalletServiceImpl implements WalletService {
 	@Override
 	public Wallet getWalletById(String id) {
 		return walletRepository.findById(id).orElseThrow(() -> new DataNotFoundException(Wallet.class, id));
+	}
+
+	@Override
+	public Wallet saveWallet(Wallet wallet) {
+		if (wallet.getSerial() == null)
+			wallet.setSerial(sequenceGeneratorService.generateSequence(Wallet.SEQUENCE_NAME));
+		return walletRepository.save(wallet);
 	}
 
 }

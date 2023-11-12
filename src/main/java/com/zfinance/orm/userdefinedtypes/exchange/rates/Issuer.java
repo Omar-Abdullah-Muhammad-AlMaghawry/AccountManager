@@ -1,4 +1,4 @@
-package com.zfinance.orm.userdefinedtypes.exchangerates;
+package com.zfinance.orm.userdefinedtypes.exchange.rates;
 
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
-public class CoinIssuer {
+public class Issuer {
 
 	@Field("id")
 	private String id;

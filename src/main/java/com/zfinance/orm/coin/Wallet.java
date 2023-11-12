@@ -7,7 +7,7 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import com.zfinance.orm.userdefinedtypes.exchangerates.CoinIssuer;
+import com.zfinance.orm.userdefinedtypes.exchange.rates.Issuer;
 import com.zfinance.orm.userdefinedtypes.smartcards.SmartCardShort;
 
 import lombok.Getter;
@@ -43,7 +43,7 @@ public class Wallet {
 	private Double creditLimit;
 
 	@Field("issuer")
-	private CoinIssuer issuer;
+	private Issuer issuer;
 
 	@Field("smart_cards")
 	private List<SmartCardShort> smartCards;

@@ -45,7 +45,7 @@ import com.zfinance.orm.userdefinedtypes.contract.CommissionIssuer;
 import com.zfinance.orm.userdefinedtypes.contract.CommissionRuleCondition;
 import com.zfinance.orm.userdefinedtypes.contract.OperationFlow;
 import com.zfinance.orm.userdefinedtypes.contract.ProviderCurrency;
-import com.zfinance.orm.userdefinedtypes.exchangerates.CoinIssuer;
+import com.zfinance.orm.userdefinedtypes.exchange.rates.Issuer;
 import com.zfinance.orm.userdefinedtypes.user.UserContractInfo;
 import com.zfinance.orm.userdefinedtypes.user.UserMemberRecord;
 import com.zfinance.repositories.contract.CommissionRepository;
@@ -468,7 +468,7 @@ public class ContractServiceImpl implements ContractService {
 		commission.setSrcParticipantSpecification(createSystemCommission.getSrcParticipantSpecification());
 		commission.setDestParticipantSpecification(createSystemCommission.getDestParticipantSpecification());
 
-		CoinIssuer issuer = issuerService.getIssuerById(createSystemCommission.getIssuerId());
+		Issuer issuer = issuerService.getIssuerById(createSystemCommission.getIssuerId());
 		if (issuer != null) {
 			CommissionIssuer commissionIssuer = new CommissionIssuer();
 			commissionIssuer.setId(issuer.getId());
@@ -503,7 +503,7 @@ public class ContractServiceImpl implements ContractService {
 				.getDestParticipantSpecification());
 
 		// TODO: which one we will use destinationIssuerId or sourceIssuerId
-		CoinIssuer issuer = issuerService.getIssuerById(createMultiCurrencySystemCommission.getSourceIssuerId());
+		Issuer issuer = issuerService.getIssuerById(createMultiCurrencySystemCommission.getSourceIssuerId());
 		if (issuer != null) {
 			CommissionIssuer commissionIssuer = new CommissionIssuer();
 			commissionIssuer.setId(issuer.getId());

@@ -24,6 +24,8 @@ public interface WalletService {
 
 	public Wallet getWalletById(String id);
 
+	public Wallet saveWallet(Wallet wallet);
+
 	// TODO: THERE'RE STILL REST
 
 }

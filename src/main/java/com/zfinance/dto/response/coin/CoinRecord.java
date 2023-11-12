@@ -2,7 +2,7 @@ package com.zfinance.dto.response.coin;
 
 import java.util.List;
 
-import com.zfinance.orm.userdefinedtypes.exchangerates.CoinIssuer;
+import com.zfinance.orm.userdefinedtypes.exchange.rates.Issuer;
 import com.zfinance.orm.userdefinedtypes.smartcards.SmartCardShort;
 
 import lombok.Getter;
@@ -21,7 +21,7 @@ public class CoinRecord {
 	private Double futureAmount;
 	private Double heldAmount;
 	private Double creditLimit;
-	private CoinIssuer issuer;
+	private Issuer issuer;
 	private List<SmartCardShort> smartCards;
 	private Boolean active;
 	private String type;
