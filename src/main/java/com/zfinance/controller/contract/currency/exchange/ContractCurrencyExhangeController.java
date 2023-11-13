@@ -21,7 +21,7 @@ import com.zfinance.orm.contract.currency.exchange.ContractCurrencyExchange;
 import com.zfinance.services.contract.currency.exchange.ContractCurrencyExchangeService;
 
 @RestController
-@RequestMapping("/contract-currency-exhange")
+@RequestMapping("/contract-currency-exchange")
 @CrossOrigin("*")
 public class ContractCurrencyExhangeController {
 
