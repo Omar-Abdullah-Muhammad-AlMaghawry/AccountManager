@@ -65,17 +65,15 @@ public class ExchangeServiceImpl implements ExchangeService {
 		List<ExchangeRate> ratesByInAndOutIssuerIds = exchangeRatesService.getRatesByInAndOutIssuerIds(
 				exchangeRatesViewBody);
 
-		// TODO : what if we have multiple fares ?
 		if (ratesByInAndOutIssuerIds != null && !ratesByInAndOutIssuerIds.isEmpty()) {
 			ExchangeRate exchangeRate = ratesByInAndOutIssuerIds.get(0);
 			rate = exchangeRate.getRate();
 			if (exchangePayload.getAmount() != null) {
-				// TODO : WICH AMOUNT WE TAKE FROM ? FUT OR AM OR AV
-				inCoin.setAmount(inCoin.getAmount() - exchangePayload.getAmount());
+//				inCoin.setAvailableAmount(inCoin.getAvailableAmount() - exchangePayload.getAmount());
 				Double rateAmout = exchangePayload.getAmount() * rate;
-				outCoin.setAmount(outCoin.getAmount() + rateAmout);
-				walletService.saveWallet(inCoin);
-				walletService.saveWallet(outCoin);
+//				outCoin.setAvailableAmount(outCoin.getAvailableAmount() + rateAmout);
+//				walletService.saveWallet(inCoin);
+//				walletService.saveWallet(outCoin);
 
 				exchangeCalculateResponse.setTopUpAmount(rateAmout);
 				exchangeCalculateResponse.setWithdrawAmount(exchangePayload.getAmount());
@@ -104,10 +102,17 @@ public class ExchangeServiceImpl implements ExchangeService {
 		exchangeSuccess.setCreatedAt(currDateString);
 		exchangeSuccess.setType(exchangePayload.getExchangeType());
 
-		if (exchangePayload.getInCoinSerial() != null)
+		if (exchangePayload.getInCoinSerial() != null) {
 			inCoin = walletService.getWalletById(exchangePayload.getInCoinSerial());
-		if (exchangePayload.getOutCoinSerial() != null)
+			inCoin.setAvailableAmount(inCoin.getAvailableAmount() - exchangeCalculate.getWithdrawAmount());
+			walletService.saveWallet(inCoin);
+		}
+
+		if (exchangePayload.getOutCoinSerial() != null) {
 			outCoin = walletService.getWalletById(exchangePayload.getOutCoinSerial());
+			outCoin.setAvailableAmount(outCoin.getAvailableAmount() + exchangeCalculate.getTopUpAmount());
+			walletService.saveWallet(outCoin);
+		}
 
 		List<ExchangeSuccessChildren> children = new ArrayList<>();
 		ExchangeSuccessChildren from = new ExchangeSuccessChildren();

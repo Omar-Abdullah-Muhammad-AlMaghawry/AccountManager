@@ -1,5 +1,7 @@
 package com.zfinance.services.account;
 
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,13 +12,22 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import com.zfinance.config.filters.TokenAuthorizationFilter;
+import com.zfinance.dto.request.account.BankAccountBody;
 import com.zfinance.dto.request.account.BankAccountsFilter;
 import com.zfinance.dto.request.account.BankAccountsSort;
 import com.zfinance.dto.request.account.MyBankAccountsFilter;
+import com.zfinance.dto.response.user.UserRecord;
 import com.zfinance.enums.StatusEnum;
+import com.zfinance.exceptions.BusinessException;
 import com.zfinance.exceptions.DataNotFoundException;
 import com.zfinance.orm.account.BankAccount;
+import com.zfinance.orm.userdefinedtypes.account.BankAccountDetails;
+import com.zfinance.orm.userdefinedtypes.exchange.rates.Issuer;
 import com.zfinance.repositories.bankaccount.BankAccountRepository;
+import com.zfinance.services.database.sequence.SequenceGeneratorService;
+import com.zfinance.services.external.AuthManagerService;
+import com.zfinance.services.external.IssuerService;
 
 @Service
 public class BankAccountServiceImpl implements BankAccountService {
@@ -26,6 +37,18 @@ public class BankAccountServiceImpl implements BankAccountService {
 
 	@Autowired
 	private BankAccountRepository bankAccountRepository;
+
+	@Autowired
+	private IssuerService issuerService;
+
+	@Autowired
+	private AuthManagerService authManagerService;
+
+	@Autowired
+	private TokenAuthorizationFilter tokenAuthorizationFilter;
+
+	@Autowired
+	private SequenceGeneratorService sequenceGeneratorService;
 
 	@Override
 	public List<BankAccount> viewMyBankAccounts(MyBankAccountsFilter myBankAccountsFilter,
@@ -166,7 +189,57 @@ public class BankAccountServiceImpl implements BankAccountService {
 
 	@Override
 	public BankAccount save(BankAccount bankAccount) {
+		if (bankAccount.getId() == null)
+			bankAccount.setId(sequenceGeneratorService.generateSequence(BankAccount.SEQUENCE_NAME));
+
 		return bankAccountRepository.save(bankAccount);
+	}
+
+	@Override
+	public BankAccount createBankAccount(BankAccountBody bankAccountBody) {
+		String token = tokenAuthorizationFilter.getToken();
+		UserRecord user = authManagerService.getUserFromToken(token);
+
+		Issuer issuerBody = issuerService.getIssuerById(bankAccountBody.getIssuerId());
+		BankAccountsFilter bankAccountsFilter = new BankAccountsFilter();
+		bankAccountsFilter.setUserIds(Arrays.asList(user.getId()));
+		List<BankAccount> userBankAccounts = viewBankAccounts(bankAccountsFilter, null);
+
+		if (!userBankAccounts.isEmpty() && userBankAccounts.size() > 3)
+			throw new BusinessException("error_maxNoBankAccountExcceed");
+		BankAccount bankAccount = new BankAccount();
+
+		bankAccount.setCreatedAt((new Date()).toString());
+		bankAccount.setUserId(user.getId());
+		bankAccount.setStatus("active");
+
+		BankAccountDetails bankAccountDetails = new BankAccountDetails();
+		bankAccountDetails.setBankAccountNumber(bankAccountBody.getAccountNumber());
+		bankAccountDetails.setBic(bankAccountBody.getBic());
+		bankAccountDetails.setIban(bankAccountBody.getIbanNumber());
+		bankAccountDetails.setName(bankAccountBody.getBankName());// TODO: need to be checked
+		bankAccountDetails.setFullName(bankAccountBody.getHolderName());
+		bankAccountDetails.setSwift(bankAccountBody.getSwift());
+		bankAccountDetails.setIssuer(issuerBody);
+
+		bankAccount.setDetails(bankAccountDetails);
+		return save(bankAccount);
+	}
+
+	@Override
+	public List<BankAccount> viewSignedInBankAccounts() {
+		String token = tokenAuthorizationFilter.getToken();
+		UserRecord user = authManagerService.getUserFromToken(token);
+		BankAccountsFilter bankAccountsFilter = new BankAccountsFilter();
+		bankAccountsFilter.setUserIds(Arrays.asList(user.getId()));
+		return viewBankAccounts(bankAccountsFilter, null);
+	}
+
+	@Override
+	public List<BankAccount> viewBankAccountsByUserId(String UserId) {
+		BankAccountsFilter bankAccountsFilter = new BankAccountsFilter();
+		bankAccountsFilter.setUserIds(Arrays.asList(UserId));
+		return viewBankAccounts(bankAccountsFilter, null);
 	}
 
 }

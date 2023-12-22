@@ -15,13 +15,13 @@ public class UserContact {
 	private String phoneNumber;
 
 	@Field("phone_verified")
-	private boolean phoneVerified;
+	private Boolean phoneVerified;
 
 	@Field("email")
 	private String email;
 
 	@Field("email_verified")
-	private boolean emailVerified;
+	private Boolean emailVerified;
 
 	@Field("country_code")
 	private String countryCode;

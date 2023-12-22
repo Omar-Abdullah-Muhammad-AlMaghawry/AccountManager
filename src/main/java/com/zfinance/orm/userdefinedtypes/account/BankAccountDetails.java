@@ -2,6 +2,8 @@ package com.zfinance.orm.userdefinedtypes.account;
 
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import com.zfinance.orm.userdefinedtypes.exchange.rates.Issuer;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,4 +33,8 @@ public class BankAccountDetails {
 
 	@Field("swift")
 	private String swift;
+
+	@Field("issuer")
+	private Issuer issuer;
+
 }

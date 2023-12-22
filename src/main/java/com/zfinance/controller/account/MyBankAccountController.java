@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,5 +42,13 @@ public class MyBankAccountController {
 				: null);
 		paginationResponse.setPageSize(options.getPageNumber() != null ? Integer.valueOf(options.getPageSize()) : null);
 		return paginationResponse;
+	}
+
+	@GetMapping("/view-signed-in")
+	public List<BankAccountRecord> viewSignedInBankAccounts() {
+
+		List<BankAccount> bankAccounts = bankAccountService.viewSignedInBankAccounts();
+
+		return BankAccountMapper.INSTANCE.mapBankAccounts(bankAccounts);
 	}
 }
