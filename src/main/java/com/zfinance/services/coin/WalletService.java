@@ -22,6 +22,8 @@ public interface WalletService {
 
 	public List<Wallet> getWalletsByOrganizationId(String organizationId);
 
+	public List<Wallet> getSignedInWalletsByCurrency(String currency);
+
 	public Wallet getWalletById(String id);
 
 	public Wallet saveWallet(Wallet wallet);

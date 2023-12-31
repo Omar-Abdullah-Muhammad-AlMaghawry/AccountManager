@@ -5,6 +5,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import com.zfinance.config.filters.TokenAuthorizationFilter;
@@ -37,6 +40,9 @@ public class WalletServiceImpl implements WalletService {
 
 	@Autowired
 	private SequenceGeneratorService sequenceGeneratorService;
+
+	@Autowired
+	private MongoTemplate mongoTemplate;
 
 	@Override
 	public List<Wallet> getWallets() {
@@ -142,6 +148,19 @@ public class WalletServiceImpl implements WalletService {
 		if (wallet.getSerial() == null)
 			wallet.setSerial(sequenceGeneratorService.generateSequence(Wallet.SEQUENCE_NAME));
 		return walletRepository.save(wallet);
+	}
+
+	@Override
+	public List<Wallet> getSignedInWalletsByCurrency(String currency) {
+		String token = tokenAuthorizationFilter.getToken();
+		UserRecord user = authManagerService.getUserFromToken(token);
+
+		// Create a query to search for wallets based on userId and currency
+		Query query = new Query();
+		query.addCriteria(Criteria.where("userId").is(user.getId()).and("issuer.currency").is(currency));
+
+		return mongoTemplate.find(query, Wallet.class);
+
 	}
 
 }
