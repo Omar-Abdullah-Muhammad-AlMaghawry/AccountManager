@@ -41,16 +41,16 @@ import com.zfinance.services.payment.PaymentService;
 @RequestMapping("/merchant-payment")
 @CrossOrigin("*")
 public class PaymentController {
-	
+
 	@Autowired
 	private ExcelParser excelParser;
-	
+
 	@Autowired
 	private CsvParser csvParser;
 
-    @Autowired
-    private XmlParser xmlParser;
-	
+	@Autowired
+	private XmlParser xmlParser;
+
 	@Autowired
 	private PaymentService paymentService;
 	
@@ -70,91 +70,93 @@ public class PaymentController {
 		return paginationResponse;
 	}
 	
+
 	@GetMapping
 	public List<PaymentRecord> getAllPayments() {
 		return PaymentMapper.INSTANCE.mapPayments(paymentService.getPayments());
 	}
-	
-	@GetMapping("/{id}")
+
+	@GetMapping("{id}")
 	public PaymentRecord getPaymentById(@PathVariable String id) {
 		return PaymentMapper.INSTANCE.mapPayment(paymentService.getPaymentById(id));
 	}
-	
+
 	@PostMapping("/create")
 	public PaymentRecord savePayment(@RequestBody PaymentRecord payment) {
-		return PaymentMapper.INSTANCE.mapPayment(paymentService.savePayment(PaymentMapper.INSTANCE.mapPaymentRecord(payment)));
+		return PaymentMapper.INSTANCE.mapPayment(paymentService.savePayment(PaymentMapper.INSTANCE.mapPaymentRecord(
+				payment)));
 	}
-	
+
 	@PostMapping("/createAll")
 	public List<PaymentRecord> savePayment(@RequestBody List<PaymentRecord> payments) {
-		return PaymentMapper.INSTANCE.mapPayments(paymentService.savePayments(PaymentMapper.INSTANCE.mapPaymentRecords(payments)));
+		return PaymentMapper.INSTANCE.mapPayments(paymentService.savePayments(PaymentMapper.INSTANCE.mapPaymentRecords(
+				payments)));
 	}
-	
+
 	@PutMapping("/{paymentId}")
 	public PaymentRecord cancelPayment(@PathVariable String PaymentId) {
 		return PaymentMapper.INSTANCE.mapPayment(paymentService.cancelPayment(PaymentId));
 	}
-	
+
 	@PostMapping("/upload")
-    public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) {
-        if (file.isEmpty()) {
-            return ResponseEntity.badRequest().body("Uploaded file is empty");
-        }
+	public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) {
+		if (file.isEmpty()) {
+			return ResponseEntity.badRequest().body("Uploaded file is empty");
+		}
 
-        try {
-            String fileExtension = getFileExtension(file.getOriginalFilename());
-            switch (fileExtension.toLowerCase()) {
-                case "csv":
-                    return handleCsvUpload(file.getInputStream());
-                case "xml":
-                    return handleXmlUpload(file.getInputStream());
-                case "xls":
-                case "xlsx":
-                    return handleExcelUpload(file.getInputStream());
-                default:
-                    return ResponseEntity.badRequest().body("Unsupported file type");
-            }
-        } catch (IOException | JAXBException | EncryptedDocumentException | CsvException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading or processing file.");
-        }
-    }
-	
-	
-	
-    public ResponseEntity<String> handleXmlUpload(InputStream inputStream) throws JAXBException, IOException {
-        
-        List<PaymentRecord> payments = xmlParser.parse(inputStream);
-        
-        paymentService.savePayments(PaymentMapper.INSTANCE.mapPaymentRecords(payments));
-        
-        return ResponseEntity.ok("File uploaded successfully.");
-    }
-	
-    public ResponseEntity<String> handleCsvUpload(InputStream inputStream) throws IOException, CsvException {
-        try (CSVReader reader = new CSVReader(new InputStreamReader(inputStream))) {
-            List<String[]> rows = reader.readAll();
-            List<PaymentRecord> paymentRecords = csvParser.parseCsvRows(rows);
+		try {
+			String fileExtension = getFileExtension(file.getOriginalFilename());
+			switch (fileExtension.toLowerCase()) {
+			case "csv":
+				return handleCsvUpload(file.getInputStream());
+			case "xml":
+				return handleXmlUpload(file.getInputStream());
+			case "xls":
+			case "xlsx":
+				return handleExcelUpload(file.getInputStream());
+			default:
+				return ResponseEntity.badRequest().body("Unsupported file type");
+			}
+		} catch (IOException | JAXBException | EncryptedDocumentException | CsvException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading or processing file.");
+		}
+	}
 
-            paymentService.savePayments(PaymentMapper.INSTANCE.mapPaymentRecords(paymentRecords));
-            
-            return ResponseEntity.ok("CSV file uploaded and processed successfully.");
-        }
-    }
-    
-    private ResponseEntity<String> handleExcelUpload(InputStream inputStream) throws IOException, EncryptedDocumentException, InvalidFormatException {
-        List<PaymentRecord> paymentRecords = excelParser.parse(inputStream);
-        
-        paymentService.savePayments(PaymentMapper.INSTANCE.mapPaymentRecords(paymentRecords));
+	public ResponseEntity<String> handleXmlUpload(InputStream inputStream) throws JAXBException, IOException {
 
-        return ResponseEntity.ok("Excel file uploaded and processed successfully.");
-        
-    }
-	
+		List<PaymentRecord> payments = xmlParser.parse(inputStream);
+
+		paymentService.savePayments(PaymentMapper.INSTANCE.mapPaymentRecords(payments));
+
+		return ResponseEntity.ok("File uploaded successfully.");
+	}
+
+	public ResponseEntity<String> handleCsvUpload(InputStream inputStream) throws IOException, CsvException {
+		try (CSVReader reader = new CSVReader(new InputStreamReader(inputStream))) {
+			List<String[]> rows = reader.readAll();
+			List<PaymentRecord> paymentRecords = csvParser.parseCsvRows(rows);
+
+			paymentService.savePayments(PaymentMapper.INSTANCE.mapPaymentRecords(paymentRecords));
+
+			return ResponseEntity.ok("CSV file uploaded and processed successfully.");
+		}
+	}
+
+	private ResponseEntity<String> handleExcelUpload(InputStream inputStream) throws IOException,
+			EncryptedDocumentException, InvalidFormatException {
+		List<PaymentRecord> paymentRecords = excelParser.parse(inputStream);
+
+		paymentService.savePayments(PaymentMapper.INSTANCE.mapPaymentRecords(paymentRecords));
+
+		return ResponseEntity.ok("Excel file uploaded and processed successfully.");
+
+	}
+
 	private String getFileExtension(String filename) {
-        if (filename != null && filename.lastIndexOf(".") != -1) {
-            return filename.substring(filename.lastIndexOf(".") + 1);
-        }
-        return "";
-    }
+		if (filename != null && filename.lastIndexOf(".") != -1) {
+			return filename.substring(filename.lastIndexOf(".") + 1);
+		}
+		return "";
+	}
 }
