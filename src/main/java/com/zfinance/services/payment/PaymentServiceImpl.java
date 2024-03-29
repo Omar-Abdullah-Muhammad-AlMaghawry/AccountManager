@@ -27,7 +27,6 @@ public class PaymentServiceImpl implements PaymentService {
 	PaymentRepository paymentRepository;
 	
 	
-
 	@Override
 	public List<Payment> serachPayments(PaymentFilter paymentFilter, PaymentSort paymentSort) {
 		Criteria criteria = new Criteria();

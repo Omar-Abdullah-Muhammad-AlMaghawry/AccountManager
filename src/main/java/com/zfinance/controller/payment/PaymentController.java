@@ -25,8 +25,13 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
+import com.zfinance.dto.request.PaginationRequestOptions;
+import com.zfinance.dto.request.payment.PaymentFilter;
 import com.zfinance.dto.request.payment.PaymentRecord;
+import com.zfinance.dto.request.payment.PaymentSort;
+import com.zfinance.dto.response.PaginationResponse;
 import com.zfinance.mapper.PaymentMapper;
+import com.zfinance.orm.payment.Payment;
 import com.zfinance.parser.CsvParser;
 import com.zfinance.parser.ExcelParser;
 import com.zfinance.parser.XmlParser;
@@ -49,12 +54,28 @@ public class PaymentController {
 	@Autowired
 	private PaymentService paymentService;
 	
+	@PostMapping
+	public PaginationResponse<PaymentRecord> getRecords(
+			@RequestBody PaginationRequestOptions<PaymentFilter, PaymentSort> data) {
+
+		List<Payment> payments = paymentService.serachPayments(data.getFilter(), data.getSort());
+
+		PaginationResponse<PaymentRecord> paginationResponse = new PaginationResponse<>();
+		paginationResponse.setRecords(PaymentMapper.INSTANCE.mapPayments(payments));
+		paginationResponse.setTotalRecords(payments.size());
+
+		paginationResponse.setPageSize(data.getPageSize() != null ? Integer.valueOf(data.getPageSize()) : null);
+		paginationResponse.setPageNumber(data.getPageNumber() != null ? Integer.valueOf(data.getPageNumber()) : null);
+
+		return paginationResponse;
+	}
+	
 	@GetMapping
 	public List<PaymentRecord> getAllPayments() {
 		return PaymentMapper.INSTANCE.mapPayments(paymentService.getPayments());
 	}
 	
-	@GetMapping("/${id}")
+	@GetMapping("/{id}")
 	public PaymentRecord getPaymentById(@PathVariable String id) {
 		return PaymentMapper.INSTANCE.mapPayment(paymentService.getPaymentById(id));
 	}
