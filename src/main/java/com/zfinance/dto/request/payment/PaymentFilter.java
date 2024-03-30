@@ -25,5 +25,5 @@ public class PaymentFilter {
 	private String description;
 	private String groupId;
 	private List<String> payoutMethod;
-	private List<String> currency;
+	private List<String> currencyCode;
 }

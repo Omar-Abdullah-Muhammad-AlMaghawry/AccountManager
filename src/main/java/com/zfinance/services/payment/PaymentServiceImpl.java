@@ -18,6 +18,7 @@ import com.zfinance.exceptions.BusinessException;
 import com.zfinance.exceptions.DataNotFoundException;
 import com.zfinance.orm.payment.Payment;
 import com.zfinance.repositories.payment.PaymentRepository;
+import com.zfinance.services.external.CurrencyService;
 import com.zfinance.services.external.UserService;
 
 @Service
@@ -31,6 +32,9 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private CurrencyService currencyService;
 
 	@Override
 	public List<Payment> searchPayments(PaymentFilter paymentFilter, PaymentSort paymentSort) {
@@ -69,8 +73,8 @@ public class PaymentServiceImpl implements PaymentService {
 			if (paymentFilter.getStatus() != null) {
 				criteria.and("status").in(paymentFilter.getStatus());
 			}
-			if (paymentFilter.getCurrency() != null) {
-				criteria.and("currency").in(paymentFilter.getCurrency());
+			if (paymentFilter.getCurrencyCode() != null) {
+				criteria.and("currencyCode").in(paymentFilter.getCurrencyCode());
 			}
 			if (paymentFilter.getGroupId() != null) {
 				criteria.and("groupId").is(paymentFilter.getGroupId());
@@ -148,11 +152,11 @@ public class PaymentServiceImpl implements PaymentService {
 					query.with(Sort.by(Sort.Order.desc("status")));
 				}
 			}
-			if (paymentSort.getCurrency() != null) {
-				if (paymentSort.getCurrency().equalsIgnoreCase("asc")) {
-					query.with(Sort.by(Sort.Order.asc("currency")));
+			if (paymentSort.getCurrencyCode() != null) {
+				if (paymentSort.getCurrencyCode().equalsIgnoreCase("asc")) {
+					query.with(Sort.by(Sort.Order.asc("currencyCode")));
 				} else {
-					query.with(Sort.by(Sort.Order.desc("cuurency")));
+					query.with(Sort.by(Sort.Order.desc("cuurencyCode")));
 				}
 			}
 			if (paymentSort.getGroupId() != null) {
@@ -199,8 +203,7 @@ public class PaymentServiceImpl implements PaymentService {
 			throw new DataNotFoundException("error_userDoesNotExist");
 		}
 
-		if (payment.getPaymentId() == null || payment.getDate() == null || payment.getAmount() == null || payment
-				.getCurrency() == null) {
+		if (payment.getPaymentId() == null || payment.getDate() == null || payment.getAmount() == null) {
 			throw new BusinessException("error_DataNotComplete");
 		}
 		return paymentRepository.save(payment);
@@ -225,9 +228,12 @@ public class PaymentServiceImpl implements PaymentService {
 			if (user == null || user.size() == 0) {
 				throw new DataNotFoundException("error_userDoesNotExist");
 			}
+			
+			if (currencyService.getCurrencyByCode(payment.getCurrencyCode())== null) {
+				throw new BusinessException("error_currencyNotFound");
+			}
 
-			if (payment.getPaymentId() == null || payment.getDate() == null || payment.getAmount() == null || payment
-					.getCurrency() == null) {
+			if (payment.getPaymentId() == null || payment.getDate() == null || payment.getAmount() == null) {
 				throw new BusinessException("error_DataNotComplete");
 			}
 			result.add(paymentRepository.save(payment));

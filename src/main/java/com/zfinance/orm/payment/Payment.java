@@ -52,8 +52,8 @@ public class Payment {
 	@Field("payout_method")
 	private String payoutMethod;
 	
-	@Field("currency")
-	private String currency;
+	@Field("currency_code")
+	private String currencyCode;
 
 	@Transient
 	public static final String SEQUENCE_NAME = "payment_sequence";

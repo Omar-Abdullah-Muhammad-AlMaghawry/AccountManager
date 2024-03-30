@@ -50,5 +50,5 @@ public class PaymentRecord {
 	private String payoutMethod;
     
     @XmlElement
-	private String currency;
+	private String currencyCode;
 }
