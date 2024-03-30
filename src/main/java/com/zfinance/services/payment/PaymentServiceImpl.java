@@ -10,12 +10,15 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import com.zfinance.dto.request.extenrnal.UsersFilter;
 import com.zfinance.dto.request.payment.PaymentFilter;
 import com.zfinance.dto.request.payment.PaymentSort;
+import com.zfinance.dto.response.user.UserRecord;
 import com.zfinance.exceptions.BusinessException;
 import com.zfinance.exceptions.DataNotFoundException;
 import com.zfinance.orm.payment.Payment;
 import com.zfinance.repositories.payment.PaymentRepository;
+import com.zfinance.services.external.UserService;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -24,7 +27,10 @@ public class PaymentServiceImpl implements PaymentService {
 	private MongoTemplate mongoTemplate;
 
 	@Autowired
-	PaymentRepository paymentRepository;
+	private PaymentRepository paymentRepository;
+
+	@Autowired
+	private UserService userService;
 
 	@Override
 	public List<Payment> searchPayments(PaymentFilter paymentFilter, PaymentSort paymentSort) {
@@ -180,6 +186,19 @@ public class PaymentServiceImpl implements PaymentService {
 		if (payment.getPayeeId() == null || payment.getPayeeName() == null) {
 			throw new BusinessException("error_payeeDoesNotExist");
 		}
+		UsersFilter usersFilter = new UsersFilter();
+		List<String> id = new ArrayList<>();
+		id.add(payment.getId());
+		usersFilter.setIds(id);
+
+		// TODO: CHECK W/ OSAMA
+		usersFilter.setEmail(payment.getPayeeName());
+
+		List<UserRecord> user = userService.searchUsers(usersFilter);
+		if (user == null || user.size() == 0) {
+			throw new DataNotFoundException("error_userDoesNotExist");
+		}
+
 		if (payment.getPaymentId() == null || payment.getDate() == null || payment.getAmount() == null || payment
 				.getCurrency() == null) {
 			throw new BusinessException("error_DataNotComplete");
@@ -194,6 +213,19 @@ public class PaymentServiceImpl implements PaymentService {
 			if (payment.getPayeeId() == null || payment.getPayeeName() == null) {
 				throw new BusinessException("error_payeeDoesNotExist");
 			}
+			UsersFilter usersFilter = new UsersFilter();
+			List<String> id = new ArrayList<>();
+			id.add(payment.getId());
+			usersFilter.setIds(id);
+
+			// TODO: CHECK W/ OSAMA
+			usersFilter.setEmail(payment.getPayeeName());
+
+			List<UserRecord> user = userService.searchUsers(usersFilter);
+			if (user == null || user.size() == 0) {
+				throw new DataNotFoundException("error_userDoesNotExist");
+			}
+
 			if (payment.getPaymentId() == null || payment.getDate() == null || payment.getAmount() == null || payment
 					.getCurrency() == null) {
 				throw new BusinessException("error_DataNotComplete");
