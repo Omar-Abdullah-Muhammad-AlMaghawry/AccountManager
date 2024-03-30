@@ -14,6 +14,7 @@ import com.zfinance.dto.request.extenrnal.UsersFilter;
 import com.zfinance.dto.request.payment.PaymentFilter;
 import com.zfinance.dto.request.payment.PaymentSort;
 import com.zfinance.dto.response.user.UserRecord;
+import com.zfinance.enums.PaymentStatusEnum;
 import com.zfinance.exceptions.BusinessException;
 import com.zfinance.exceptions.DataNotFoundException;
 import com.zfinance.orm.payment.Payment;
@@ -206,6 +207,9 @@ public class PaymentServiceImpl implements PaymentService {
 		if (payment.getPaymentId() == null || payment.getDate() == null || payment.getAmount() == null) {
 			throw new BusinessException("error_DataNotComplete");
 		}
+		
+		
+		payment.setStatus(PaymentStatusEnum.PENDING.getCode());
 		return paymentRepository.save(payment);
 	}
 
@@ -236,6 +240,7 @@ public class PaymentServiceImpl implements PaymentService {
 			if (payment.getPaymentId() == null || payment.getDate() == null || payment.getAmount() == null) {
 				throw new BusinessException("error_DataNotComplete");
 			}
+			payment.setStatus(PaymentStatusEnum.PENDING.getCode());
 			result.add(paymentRepository.save(payment));
 		}
 		return result;
@@ -247,10 +252,10 @@ public class PaymentServiceImpl implements PaymentService {
 		if (payment == null) {
 			throw new DataNotFoundException("error_paymentNotFound");
 		}
-		if (payment.getStatus() != "pending") {
+		if (payment.getStatus() != PaymentStatusEnum.PENDING.getCode()) {
 			throw new BusinessException("error_paymentNotPending");
 		}
-		payment.setStatus("cancelled");
+		payment.setStatus(PaymentStatusEnum.CANCELLED.getCode());
 		return paymentRepository.save(payment);
 	}
 
