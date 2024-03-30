@@ -9,7 +9,7 @@ import javax.xml.bind.Unmarshaller;
 
 import org.springframework.stereotype.Component;
 
-import com.zfinance.dto.request.payment.PaymentRecord;
+import com.zfinance.dto.response.payment.PaymentRecord;
 
 @Component
 public class XmlParser {

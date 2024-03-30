@@ -13,7 +13,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.stereotype.Component;
 
-import com.zfinance.dto.request.payment.PaymentRecord;
+import com.zfinance.dto.response.payment.PaymentRecord;
 
 @Component
 public class ExcelParser {

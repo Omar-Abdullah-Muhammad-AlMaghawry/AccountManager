@@ -27,9 +27,9 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import com.zfinance.dto.request.PaginationRequestOptions;
 import com.zfinance.dto.request.payment.PaymentFilter;
-import com.zfinance.dto.request.payment.PaymentRecord;
 import com.zfinance.dto.request.payment.PaymentSort;
 import com.zfinance.dto.response.PaginationResponse;
+import com.zfinance.dto.response.payment.PaymentRecord;
 import com.zfinance.mapper.PaymentMapper;
 import com.zfinance.orm.payment.Payment;
 import com.zfinance.parser.CsvParser;
@@ -53,23 +53,23 @@ public class PaymentController {
 
 	@Autowired
 	private PaymentService paymentService;
-	
+
 	@PostMapping
 	public PaginationResponse<PaymentRecord> getRecords(
-			@RequestBody PaginationRequestOptions<PaymentFilter, PaymentSort> data) {
+			@RequestBody PaginationRequestOptions<PaymentFilter, PaymentSort> options) {
 
-		List<Payment> payments = paymentService.serachPayments(data.getFilter(), data.getSort());
+		List<Payment> payments = paymentService.searchPayments(options.getFilter(), options.getSort());
 
 		PaginationResponse<PaymentRecord> paginationResponse = new PaginationResponse<>();
 		paginationResponse.setRecords(PaymentMapper.INSTANCE.mapPayments(payments));
 		paginationResponse.setTotalRecords(payments.size());
 
-		paginationResponse.setPageSize(data.getPageSize() != null ? Integer.valueOf(data.getPageSize()) : null);
-		paginationResponse.setPageNumber(data.getPageNumber() != null ? Integer.valueOf(data.getPageNumber()) : null);
+		paginationResponse.setPageSize(options.getPageSize() != null ? Integer.valueOf(options.getPageSize()) : null);
+		paginationResponse.setPageNumber(options.getPageNumber() != null ? Integer.valueOf(options.getPageNumber())
+				: null);
 
 		return paginationResponse;
 	}
-	
 
 	@GetMapping
 	public List<PaymentRecord> getAllPayments() {

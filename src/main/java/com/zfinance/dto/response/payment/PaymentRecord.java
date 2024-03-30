@@ -1,4 +1,4 @@
-package com.zfinance.dto.request.payment;
+package com.zfinance.dto.response.payment;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;

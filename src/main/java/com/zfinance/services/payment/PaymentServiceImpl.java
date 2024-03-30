@@ -19,16 +19,15 @@ import com.zfinance.repositories.payment.PaymentRepository;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
-	
+
 	@Autowired
 	private MongoTemplate mongoTemplate;
-	
+
 	@Autowired
 	PaymentRepository paymentRepository;
-	
-	
+
 	@Override
-	public List<Payment> serachPayments(PaymentFilter paymentFilter, PaymentSort paymentSort) {
+	public List<Payment> searchPayments(PaymentFilter paymentFilter, PaymentSort paymentSort) {
 		Criteria criteria = new Criteria();
 		if (paymentFilter != null) {
 			if (paymentFilter.getId() != null) {
@@ -77,7 +76,7 @@ public class PaymentServiceImpl implements PaymentService {
 				criteria.and("payoutMethod").in(paymentFilter.getPayoutMethod());
 			}
 		}
-		
+
 		Query query = new Query(criteria);
 		if (paymentSort != null) {
 			if (paymentSort.getId() != null) {
@@ -172,7 +171,7 @@ public class PaymentServiceImpl implements PaymentService {
 				}
 			}
 		}
-		
+
 		return mongoTemplate.find(query, Payment.class);
 	}
 
@@ -181,7 +180,8 @@ public class PaymentServiceImpl implements PaymentService {
 		if (payment.getPayeeId() == null || payment.getPayeeName() == null) {
 			throw new BusinessException("error_payeeDoesNotExist");
 		}
-		if (payment.getPaymentId() == null || payment.getDate() == null || payment.getAmount() == null || payment.getCurrency() == null) {
+		if (payment.getPaymentId() == null || payment.getDate() == null || payment.getAmount() == null || payment
+				.getCurrency() == null) {
 			throw new BusinessException("error_DataNotComplete");
 		}
 		return paymentRepository.save(payment);
@@ -194,7 +194,8 @@ public class PaymentServiceImpl implements PaymentService {
 			if (payment.getPayeeId() == null || payment.getPayeeName() == null) {
 				throw new BusinessException("error_payeeDoesNotExist");
 			}
-			if (payment.getPaymentId() == null || payment.getDate() == null || payment.getAmount() == null || payment.getCurrency() == null) {
+			if (payment.getPaymentId() == null || payment.getDate() == null || payment.getAmount() == null || payment
+					.getCurrency() == null) {
 				throw new BusinessException("error_DataNotComplete");
 			}
 			result.add(paymentRepository.save(payment));
@@ -225,6 +226,4 @@ public class PaymentServiceImpl implements PaymentService {
 		return paymentRepository.findByPaymentId(id);
 	}
 
-	
-	
 }
