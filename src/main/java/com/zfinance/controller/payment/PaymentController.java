@@ -107,6 +107,8 @@ public class PaymentController {
 		try {
 			String fileExtension = getFileExtension(file.getOriginalFilename());
 			switch (fileExtension.toLowerCase()) {
+
+			// TODO: CHECK W/ OSAMA THE ORDER OF THE OBJECT
 			case "csv":
 				return handleCsvUpload(file.getInputStream());
 			case "xml":

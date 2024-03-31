@@ -19,6 +19,7 @@ import com.zfinance.exceptions.BusinessException;
 import com.zfinance.exceptions.DataNotFoundException;
 import com.zfinance.orm.payment.Payment;
 import com.zfinance.repositories.payment.PaymentRepository;
+import com.zfinance.services.database.sequence.SequenceGeneratorService;
 import com.zfinance.services.external.CurrencyService;
 import com.zfinance.services.external.UserService;
 
@@ -32,8 +33,11 @@ public class PaymentServiceImpl implements PaymentService {
 	private PaymentRepository paymentRepository;
 
 	@Autowired
+	private SequenceGeneratorService sequenceGeneratorService;
+
+	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private CurrencyService currencyService;
 
@@ -65,11 +69,10 @@ public class PaymentServiceImpl implements PaymentService {
 			if (paymentFilter.getDateTo() != null) {
 				// handle date
 			}
-			if (paymentFilter.getAmountFrom() != null) {
-				criteria.and("amountFrom").gte(paymentFilter.getAmountFrom());
-			}
-			if (paymentFilter.getAmountTo() != null) {
-				criteria.and("amountTo").lte(paymentFilter.getAmountTo());
+			if (paymentFilter.getAmountFrom() != null || paymentFilter.getAmountTo() != null) {
+//				if(paymentFilter.getAmountFrom() == null) paymentFilter.setAmountFrom(); // -inf
+//				if(paymentFilter.getAmountTo() == null) paymentFilter.setAmountTo(); // inf
+				criteria.and("amount").lte(paymentFilter.getAmountTo()).gte(paymentFilter.getAmountFrom());
 			}
 			if (paymentFilter.getStatus() != null) {
 				criteria.and("status").in(paymentFilter.getStatus());
@@ -186,6 +189,7 @@ public class PaymentServiceImpl implements PaymentService {
 		return mongoTemplate.find(query, Payment.class);
 	}
 
+	// TODO: PAYMENT_ID IS UNIQUE ..
 	@Override
 	public Payment savePayment(Payment payment) {
 		if (payment.getPayeeId() == null || payment.getPayeeName() == null) {
@@ -193,11 +197,11 @@ public class PaymentServiceImpl implements PaymentService {
 		}
 		UsersFilter usersFilter = new UsersFilter();
 		List<String> id = new ArrayList<>();
-		id.add(payment.getId());
+		id.add(payment.getPayeeId());
 		usersFilter.setIds(id);
 
 		// TODO: CHECK W/ OSAMA
-		usersFilter.setEmail(payment.getPayeeName());
+//		usersFilter.setEmail(payment.getPayeeName());
 
 		List<UserRecord> user = userService.searchUsers(usersFilter);
 		if (user == null || user.size() == 0) {
@@ -207,9 +211,13 @@ public class PaymentServiceImpl implements PaymentService {
 		if (payment.getPaymentId() == null || payment.getDate() == null || payment.getAmount() == null) {
 			throw new BusinessException("error_DataNotComplete");
 		}
-		
-		
+
 		payment.setStatus(PaymentStatusEnum.PENDING.getCode());
+
+		// TODO: PAYEMENT ID
+		if (payment.getId() == null)
+			payment.setId(sequenceGeneratorService.generateSequence(Payment.SEQUENCE_NAME));
+
 		return paymentRepository.save(payment);
 	}
 
@@ -232,8 +240,8 @@ public class PaymentServiceImpl implements PaymentService {
 			if (user == null || user.size() == 0) {
 				throw new DataNotFoundException("error_userDoesNotExist");
 			}
-			
-			if (currencyService.getCurrencyByCode(payment.getCurrencyCode())== null) {
+
+			if (currencyService.getCurrencyByCode(payment.getCurrencyCode()) == null) {
 				throw new BusinessException("error_currencyNotFound");
 			}
 
