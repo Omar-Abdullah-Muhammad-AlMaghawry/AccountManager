@@ -18,6 +18,6 @@ public interface PaymentService {
 
 	public List<Payment> getPayments();
 
-	public Payment getPaymentById(String id);
+	public Payment getPaymentByPaymentId(String id);
 
 }

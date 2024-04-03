@@ -76,9 +76,9 @@ public class PaymentController {
 		return PaymentMapper.INSTANCE.mapPayments(paymentService.getPayments());
 	}
 
-	@GetMapping("{id}")
-	public PaymentRecord getPaymentById(@PathVariable String id) {
-		return PaymentMapper.INSTANCE.mapPayment(paymentService.getPaymentById(id));
+	@GetMapping("{paymentId}")
+	public PaymentRecord getPaymentById(@PathVariable String paymentid) {
+		return PaymentMapper.INSTANCE.mapPayment(paymentService.getPaymentByPaymentId(paymentid));
 	}
 
 	@PostMapping("/create")

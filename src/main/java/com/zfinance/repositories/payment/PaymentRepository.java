@@ -8,4 +8,7 @@ public interface PaymentRepository extends MongoRepository<Payment, String> {
 
 	Payment findByPaymentId(String paymentId);
 
+	boolean existsByPaymentId(String paymentId);
+
+
 }

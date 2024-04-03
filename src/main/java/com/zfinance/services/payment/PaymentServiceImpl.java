@@ -66,10 +66,10 @@ public class PaymentServiceImpl implements PaymentService {
 				// handle date
 			}
 			if (paymentFilter.getAmountFrom() != null) {
-				criteria.and("amountFrom").gte(paymentFilter.getAmountFrom());
+				criteria.and("amount").gte(paymentFilter.getAmountFrom());
 			}
 			if (paymentFilter.getAmountTo() != null) {
-				criteria.and("amountTo").lte(paymentFilter.getAmountTo());
+				criteria.and("amount").lte(paymentFilter.getAmountTo());
 			}
 			if (paymentFilter.getStatus() != null) {
 				criteria.and("status").in(paymentFilter.getStatus());
@@ -185,9 +185,8 @@ public class PaymentServiceImpl implements PaymentService {
 
 		return mongoTemplate.find(query, Payment.class);
 	}
-
-	@Override
-	public Payment savePayment(Payment payment) {
+	
+	private void validate(Payment payment) {
 		if (payment.getPayeeId() == null || payment.getPayeeName() == null) {
 			throw new BusinessException("error_payeeDoesNotExist");
 		}
@@ -208,6 +207,14 @@ public class PaymentServiceImpl implements PaymentService {
 			throw new BusinessException("error_DataNotComplete");
 		}
 		
+		if (paymentRepository.existsByPaymentId(payment.getPaymentId())) {
+			throw new BusinessException("error_PaymentIdAlreadyExists");
+		}
+	}
+
+	@Override
+	public Payment savePayment(Payment payment) {
+		validate(payment);
 		
 		payment.setStatus(PaymentStatusEnum.PENDING.getCode());
 		return paymentRepository.save(payment);
@@ -217,29 +224,7 @@ public class PaymentServiceImpl implements PaymentService {
 	public List<Payment> savePayments(List<Payment> payments) {
 		List<Payment> result = new ArrayList<>();
 		for (Payment payment : payments) {
-			if (payment.getPayeeId() == null || payment.getPayeeName() == null) {
-				throw new BusinessException("error_payeeDoesNotExist");
-			}
-			UsersFilter usersFilter = new UsersFilter();
-			List<String> id = new ArrayList<>();
-			id.add(payment.getId());
-			usersFilter.setIds(id);
-
-			// TODO: CHECK W/ OSAMA
-			usersFilter.setEmail(payment.getPayeeName());
-
-			List<UserRecord> user = userService.searchUsers(usersFilter);
-			if (user == null || user.size() == 0) {
-				throw new DataNotFoundException("error_userDoesNotExist");
-			}
-			
-			if (currencyService.getCurrencyByCode(payment.getCurrencyCode())== null) {
-				throw new BusinessException("error_currencyNotFound");
-			}
-
-			if (payment.getPaymentId() == null || payment.getDate() == null || payment.getAmount() == null) {
-				throw new BusinessException("error_DataNotComplete");
-			}
+			validate(payment);
 			payment.setStatus(PaymentStatusEnum.PENDING.getCode());
 			result.add(paymentRepository.save(payment));
 		}
@@ -265,8 +250,8 @@ public class PaymentServiceImpl implements PaymentService {
 	}
 
 	@Override
-	public Payment getPaymentById(String id) {
-		return paymentRepository.findByPaymentId(id);
+	public Payment getPaymentByPaymentId(String paymentId) {
+		return paymentRepository.findByPaymentId(paymentId);
 	}
 
 }
