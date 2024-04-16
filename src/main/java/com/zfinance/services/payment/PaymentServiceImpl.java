@@ -190,6 +190,7 @@ public class PaymentServiceImpl implements PaymentService {
 	}
 
 	// TODO: PAYMENT_ID IS UNIQUE .. to be generative
+	//TODO: Download an example of excel sheet to fill it
 	@Override
 	public Payment savePayment(Payment payment) {
 		if (payment.getPayeeId() == null || payment.getPayeeName() == null) {
