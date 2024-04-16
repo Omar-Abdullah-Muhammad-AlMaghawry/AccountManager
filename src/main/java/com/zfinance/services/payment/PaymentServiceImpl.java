@@ -189,7 +189,7 @@ public class PaymentServiceImpl implements PaymentService {
 		return mongoTemplate.find(query, Payment.class);
 	}
 
-	// TODO: PAYMENT_ID IS UNIQUE ..
+	// TODO: PAYMENT_ID IS UNIQUE .. to be generative
 	@Override
 	public Payment savePayment(Payment payment) {
 		if (payment.getPayeeId() == null || payment.getPayeeName() == null) {
@@ -200,7 +200,7 @@ public class PaymentServiceImpl implements PaymentService {
 		id.add(payment.getPayeeId());
 		usersFilter.setIds(id);
 
-		// TODO: CHECK W/ OSAMA
+		// TODO: CHECK W/ OSAMA use email until now .. after a while we will use username at regestration to be unique
 //		usersFilter.setEmail(payment.getPayeeName());
 
 		List<UserRecord> user = userService.searchUsers(usersFilter);
