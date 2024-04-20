@@ -1,5 +1,7 @@
 package com.zfinance.orm.payment;
 
+
+import java.time.LocalDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -35,7 +37,7 @@ public class Payment {
 	private String companyName;
 	
 	@Field("date")
-	private String date;
+	private LocalDate date;
 	
 	@Field("amount")
 	private Double amount;

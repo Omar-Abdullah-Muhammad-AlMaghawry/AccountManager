@@ -1,5 +1,6 @@
 package com.zfinance.dto.request.payment;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import lombok.Getter;
@@ -12,18 +13,18 @@ import lombok.Setter;
 public class PaymentFilter {
 
 	private String id;
-	private List<String> payeeId;
+	private String payeeId;
 	private String paymentId;
 	private String payoneerPaymentId;
-	private List<String> payeeName;
-	private List<String> companyName;
-	private String dateFrom;
-	private String dateTo;
+	private String payeeName;
+	private String companyName;
+	private LocalDate dateFrom;
+	private LocalDate dateTo;
 	private Double amountFrom;
 	private Double amountTo;
 	private List<String> status;
 	private String description;
 	private String groupId;
-	private List<String> payoutMethod;
-	private List<String> currencyCode;
+	private String payoutMethod;
+	private List<String> currencyCodes;
 }
