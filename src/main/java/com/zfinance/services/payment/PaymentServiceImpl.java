@@ -59,23 +59,21 @@ public class PaymentServiceImpl implements PaymentService {
 			if (paymentFilter.getCompanyName() != null) {
 				criteria.and("companyName").in(paymentFilter.getCompanyName());
 			}
-			if (paymentFilter.getDateFrom() != null) {
-				// handle date
-			}
-			if (paymentFilter.getDateTo() != null) {
-				// handle date
-			}
-			if (paymentFilter.getAmountFrom() != null) {
-				criteria.and("amount").gte(paymentFilter.getAmountFrom());
-			}
-			if (paymentFilter.getAmountTo() != null) {
-				criteria.and("amount").lte(paymentFilter.getAmountTo());
+			if (paymentFilter.getDateFrom() != null && paymentFilter.getDateTo() != null) {
+				criteria.and("date").gte(paymentFilter.getDateFrom()).lte(paymentFilter.getDateTo());
+	        } else if (paymentFilter.getDateFrom() != null) {
+	            criteria = criteria.and("date").gte(paymentFilter.getDateFrom());
+	        } else if (paymentFilter.getDateTo() != null) {
+	            criteria = criteria.and("date").lte(paymentFilter.getDateTo());
+	        }
+			if (paymentFilter.getAmountFrom() != null || paymentFilter.getAmountTo() != null) {
+				criteria.and("amount").gte((paymentFilter.getAmountFrom() == null ? Double.MIN_VALUE : paymentFilter.getAmountFrom())).lte(paymentFilter.getAmountTo() == null ? Double.MAX_VALUE : paymentFilter.getAmountTo());
 			}
 			if (paymentFilter.getStatus() != null) {
 				criteria.and("status").in(paymentFilter.getStatus());
 			}
-			if (paymentFilter.getCurrencyCode() != null) {
-				criteria.and("currencyCode").in(paymentFilter.getCurrencyCode());
+			if (paymentFilter.getCurrencyCodes() != null) {
+				criteria.and("currencyCode").in(paymentFilter.getCurrencyCodes());
 			}
 			if (paymentFilter.getGroupId() != null) {
 				criteria.and("groupId").is(paymentFilter.getGroupId());
@@ -192,11 +190,11 @@ public class PaymentServiceImpl implements PaymentService {
 		}
 		UsersFilter usersFilter = new UsersFilter();
 		List<String> id = new ArrayList<>();
-		id.add(payment.getId());
+		id.add(payment.getPayeeId());
 		usersFilter.setIds(id);
 
 		// TODO: CHECK W/ OSAMA
-		usersFilter.setEmail(payment.getPayeeName());
+		//usersFilter.setEmail(payment.getPayeeName());
 
 		List<UserRecord> user = userService.searchUsers(usersFilter);
 		if (user == null || user.size() == 0) {
@@ -237,7 +235,7 @@ public class PaymentServiceImpl implements PaymentService {
 		if (payment == null) {
 			throw new DataNotFoundException("error_paymentNotFound");
 		}
-		if (payment.getStatus() != PaymentStatusEnum.PENDING.getCode()) {
+		if (payment.getStatus().equals(PaymentStatusEnum.PENDING.getCode())) {
 			throw new BusinessException("error_paymentNotPending");
 		}
 		payment.setStatus(PaymentStatusEnum.CANCELLED.getCode());

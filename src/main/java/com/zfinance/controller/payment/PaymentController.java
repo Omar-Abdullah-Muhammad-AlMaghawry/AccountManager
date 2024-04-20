@@ -94,8 +94,8 @@ public class PaymentController {
 	}
 
 	@PutMapping("/{paymentId}")
-	public PaymentRecord cancelPayment(@PathVariable String PaymentId) {
-		return PaymentMapper.INSTANCE.mapPayment(paymentService.cancelPayment(PaymentId));
+	public PaymentRecord cancelPayment(@PathVariable String paymentId) {
+		return PaymentMapper.INSTANCE.mapPayment(paymentService.cancelPayment(paymentId));
 	}
 
 	@PostMapping("/upload")
