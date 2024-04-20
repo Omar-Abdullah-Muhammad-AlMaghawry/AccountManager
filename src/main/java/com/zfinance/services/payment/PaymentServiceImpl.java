@@ -19,6 +19,7 @@ import com.zfinance.exceptions.BusinessException;
 import com.zfinance.exceptions.DataNotFoundException;
 import com.zfinance.orm.payment.Payment;
 import com.zfinance.repositories.payment.PaymentRepository;
+import com.zfinance.services.database.sequence.SequenceGeneratorService;
 import com.zfinance.services.external.CurrencyService;
 import com.zfinance.services.external.UserService;
 
@@ -32,8 +33,11 @@ public class PaymentServiceImpl implements PaymentService {
 	private PaymentRepository paymentRepository;
 
 	@Autowired
+	private SequenceGeneratorService sequenceGeneratorService;
+
+	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private CurrencyService currencyService;
 
@@ -185,6 +189,10 @@ public class PaymentServiceImpl implements PaymentService {
 	}
 	
 	private void validate(Payment payment) {
+
+	// TODO: PAYMENT_ID IS UNIQUE .. to be generative
+	//TODO: Download an example of excel sheet to fill it
+
 		if (payment.getPayeeId() == null || payment.getPayeeName() == null) {
 			throw new BusinessException("error_payeeDoesNotExist");
 		}
@@ -193,8 +201,9 @@ public class PaymentServiceImpl implements PaymentService {
 		id.add(payment.getPayeeId());
 		usersFilter.setIds(id);
 
-		// TODO: CHECK W/ OSAMA
-		//usersFilter.setEmail(payment.getPayeeName());
+
+		// TODO: CHECK W/ OSAMA use email until now .. after a while we will use username at regestration to be unique
+//		usersFilter.setEmail(payment.getPayeeName());
 
 		List<UserRecord> user = userService.searchUsers(usersFilter);
 		if (user == null || user.size() == 0) {
@@ -213,8 +222,12 @@ public class PaymentServiceImpl implements PaymentService {
 	@Override
 	public Payment savePayment(Payment payment) {
 		validate(payment);
-		
 		payment.setStatus(PaymentStatusEnum.PENDING.getCode());
+
+		// TODO: PAYEMENT ID
+		if (payment.getId() == null)
+			payment.setId(sequenceGeneratorService.generateSequence(Payment.SEQUENCE_NAME));
+
 		return paymentRepository.save(payment);
 	}
 
@@ -223,6 +236,7 @@ public class PaymentServiceImpl implements PaymentService {
 		List<Payment> result = new ArrayList<>();
 		for (Payment payment : payments) {
 			validate(payment);
+
 			payment.setStatus(PaymentStatusEnum.PENDING.getCode());
 			result.add(paymentRepository.save(payment));
 		}
