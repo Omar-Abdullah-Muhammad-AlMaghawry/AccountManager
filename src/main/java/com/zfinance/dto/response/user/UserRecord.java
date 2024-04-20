@@ -16,6 +16,7 @@ public class UserRecord {
 
 	private String id;
 	private String name;
+	private String email;
 	private String createdAt;
 	private Boolean active;
 	private Boolean banned;
