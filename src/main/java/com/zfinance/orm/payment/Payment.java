@@ -2,6 +2,7 @@ package com.zfinance.orm.payment;
 
 
 import java.time.LocalDate;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -23,6 +24,9 @@ public class Payment {
 
 	@Field("payee_id")
 	private String payeeId;
+	
+	@Field("merchant_id")
+	private String merchantId;
 	
 	@Field("payment_id")
 	private String paymentId;

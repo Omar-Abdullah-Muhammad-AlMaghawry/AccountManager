@@ -1,7 +1,5 @@
 package com.zfinance.dto.response.payment;
 
-import java.time.LocalDate;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -22,6 +20,9 @@ public class PaymentRecord {
 	private String payeeId;
     
     @XmlElement
+	private String merchantId;
+    
+    @XmlElement
 	private String paymentId;
     
     @XmlElement
@@ -34,7 +35,7 @@ public class PaymentRecord {
 	private String companyName;
     
     @XmlElement
-	private LocalDate date;
+	private String date;
     
     @XmlElement
 	private Double amount;

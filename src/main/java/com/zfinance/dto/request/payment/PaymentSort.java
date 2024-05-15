@@ -11,6 +11,7 @@ public class PaymentSort {
 
 	private String id;
 	private String payeeId;
+	private String merchantId;
 	private String paymentId;
 	private String payoneerPaymentId;
 	private String payeeName;

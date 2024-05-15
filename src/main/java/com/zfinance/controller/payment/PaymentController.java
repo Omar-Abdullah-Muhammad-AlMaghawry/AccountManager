@@ -36,6 +36,7 @@ import com.zfinance.parser.CsvParser;
 import com.zfinance.parser.ExcelParser;
 import com.zfinance.parser.XmlParser;
 import com.zfinance.services.payment.PaymentService;
+import com.zfinance.services.rng.RngService;
 
 @RestController
 @RequestMapping("/merchant-payment")
@@ -53,6 +54,15 @@ public class PaymentController {
 
 	@Autowired
 	private PaymentService paymentService;
+	
+	@Autowired
+	private RngService rngService;
+
+	
+    @GetMapping("/generate-paymentId")
+    public String generateRandomId() {
+        return rngService.getRandomCodeOfSize8();
+    }
 
 	@PostMapping
 	public PaginationResponse<PaymentRecord> getRecords(
@@ -76,7 +86,7 @@ public class PaymentController {
 		return PaymentMapper.INSTANCE.mapPayments(paymentService.getPayments());
 	}
 
-	@GetMapping("{paymentId}")
+	@GetMapping("/{paymentId}")
 	public PaymentRecord getPaymentById(@PathVariable String paymentid) {
 		return PaymentMapper.INSTANCE.mapPayment(paymentService.getPaymentByPaymentId(paymentid));
 	}

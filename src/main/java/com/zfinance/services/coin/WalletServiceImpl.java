@@ -43,6 +43,15 @@ public class WalletServiceImpl implements WalletService {
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
+	
+	public List<Wallet> searchWalletsByUserAndCurrency(String userId, String currency) {
+		Criteria criteria = new Criteria();
+		criteria.and("userId").is(userId);
+		criteria.and("issuer.currency").is(currency);
+		
+		Query query = new Query(criteria);
+		return mongoTemplate.find(query, Wallet.class);
+	}
 
 	@Override
 	public List<Wallet> getWallets() {
@@ -161,6 +170,11 @@ public class WalletServiceImpl implements WalletService {
 
 		return mongoTemplate.find(query, Wallet.class);
 
+	}
+
+	@Override
+	public List<Wallet> getWalletBySerial(String serial) {
+		return walletRepository.findAllBySerial(serial);
 	}
 
 }

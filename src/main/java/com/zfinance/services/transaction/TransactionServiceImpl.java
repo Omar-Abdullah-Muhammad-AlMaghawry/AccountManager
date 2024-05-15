@@ -14,10 +14,15 @@ import org.springframework.stereotype.Service;
 import com.zfinance.dto.request.transaction.TransactionsFilter;
 import com.zfinance.dto.request.transaction.TransactionsSort;
 import com.zfinance.exceptions.DataNotFoundException;
+import com.zfinance.orm.coin.Wallet;
+import com.zfinance.orm.payment.Payment;
 import com.zfinance.orm.transaction.Transaction;
 import com.zfinance.orm.userdefinedtypes.exchange.rates.Issuer;
+import com.zfinance.orm.userdefinedtypes.transaction.Target;
 import com.zfinance.repositories.transaction.TransactionRepository;
+import com.zfinance.services.coin.WalletService;
 import com.zfinance.services.external.IssuerService;
+import com.zfinance.services.transactionBrief.TransactionBriefService;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -30,6 +35,13 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Autowired
 	private IssuerService issuerService;
+	
+	@Autowired
+	private TransactionBriefService transactionBriefService;
+	
+	@Autowired
+	private WalletService walletService;
+	
 
 	@Override
 	public List<Transaction> getRecords(TransactionsFilter transactionsFilter, TransactionsSort transactionsSort) {
@@ -137,7 +149,32 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Override
 	public Transaction save(Transaction transaction) {
+		transactionBriefService.createTransactionBrief(transaction);
+		
 		return transactionRepository.save(transaction);
 	}
 
+	@Override
+	public Transaction createTransaction(Payment payment) {
+		Transaction transaction = new Transaction();
+		
+		// ToDo: check if more details needed
+		Wallet payeeWallet = walletService.searchWalletsByUserAndCurrency(payment.getPayeeId(), payment.getCurrencyCode()).get(0);
+		Wallet payerWallet = walletService.searchWalletsByUserAndCurrency(payment.getMerchantId(), payment.getCurrencyCode()).get(0);
+		Target to = new Target();
+		to.setSerial(payeeWallet.getSerial());
+		to.setIssuer(payeeWallet.getIssuer());
+		Target from = new Target();
+		from.setSerial(payerWallet.getSerial());
+		from.setIssuer(payerWallet.getIssuer());
+		
+		transaction.setTo(to);
+		transaction.setFrom(from);
+		transaction.setAmount(payment.getAmount());
+		transaction.setDescription(payment.getDescription());
+		transaction.setStatus(payment.getStatus());
+		
+		
+		return this.save(transaction);
+	}
 }

@@ -11,5 +11,7 @@ public interface WalletRepository extends MongoRepository<Wallet, String> {
 	List<Wallet> findAllByOrganizationId(String organizationId);
 
 	List<Wallet> findAllByUserId(String userId);
+	
+	List<Wallet> findAllBySerial(String serial);
 
 }

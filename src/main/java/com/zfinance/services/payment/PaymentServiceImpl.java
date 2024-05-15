@@ -17,11 +17,14 @@ import com.zfinance.dto.response.user.UserRecord;
 import com.zfinance.enums.PaymentStatusEnum;
 import com.zfinance.exceptions.BusinessException;
 import com.zfinance.exceptions.DataNotFoundException;
+import com.zfinance.orm.coin.Wallet;
 import com.zfinance.orm.payment.Payment;
 import com.zfinance.repositories.payment.PaymentRepository;
+import com.zfinance.services.coin.WalletService;
 import com.zfinance.services.database.sequence.SequenceGeneratorService;
 import com.zfinance.services.external.CurrencyService;
 import com.zfinance.services.external.UserService;
+import com.zfinance.services.transaction.TransactionService;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -40,6 +43,12 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Autowired
 	private CurrencyService currencyService;
+	
+	@Autowired
+	private WalletService walletService;
+	
+	@Autowired
+	private TransactionService transactionService;
 
 	@Override
 	public List<Payment> searchPayments(PaymentFilter paymentFilter, PaymentSort paymentSort) {
@@ -189,12 +198,17 @@ public class PaymentServiceImpl implements PaymentService {
 	}
 	
 	private void validate(Payment payment) {
+		
+		
 
 	// TODO: PAYMENT_ID IS UNIQUE .. to be generative
 	//TODO: Download an example of excel sheet to fill it
 
 		if (payment.getPayeeId() == null || payment.getPayeeName() == null) {
 			throw new BusinessException("error_payeeDoesNotExist");
+		}
+		if (payment.getPayeeId().equals(payment.getMerchantId())) {
+			throw new BusinessException("error_senderAndReciverAreTheSame");
 		}
 		UsersFilter usersFilter = new UsersFilter();
 		List<String> id = new ArrayList<>();
@@ -203,11 +217,24 @@ public class PaymentServiceImpl implements PaymentService {
 
 
 		// TODO: CHECK W/ OSAMA use email until now .. after a while we will use username at regestration to be unique
-//		usersFilter.setEmail(payment.getPayeeName());
+		usersFilter.setEmail(payment.getPayeeName());
 
 		List<UserRecord> user = userService.searchUsers(usersFilter);
 		if (user == null || user.size() == 0) {
 			throw new DataNotFoundException("error_userDoesNotExist");
+		}
+		
+		List<Wallet> payeeWallet = walletService.searchWalletsByUserAndCurrency(payment.getPayeeId(), payment.getCurrencyCode());
+		if (payeeWallet == null || payeeWallet.size() == 0) {
+			throw new BusinessException("error_payeeWalletDoesNotExist");
+		}
+		List<Wallet> payerWallet = walletService.searchWalletsByUserAndCurrency(payment.getMerchantId(), payment.getCurrencyCode());
+		if (payerWallet == null || payerWallet.size() == 0) {
+			throw new BusinessException("error_payerWalletDoesNotExist");
+		}
+		
+		if (payerWallet.get(0).getAmount() < payment.getAmount()) {
+			throw new BusinessException("error_notEnoughBalance");
 		}
 
 		if (payment.getPaymentId() == null || payment.getDate() == null || payment.getAmount() == null) {
@@ -218,16 +245,26 @@ public class PaymentServiceImpl implements PaymentService {
 			throw new BusinessException("error_PaymentIdAlreadyExists");
 		}
 	}
+	
+	private void applyPayment(Payment payment) {
+		List<Wallet> payeeWallet = walletService.searchWalletsByUserAndCurrency(payment.getPayeeId(), payment.getCurrencyCode());
+		List<Wallet> payerWallet = walletService.searchWalletsByUserAndCurrency(payment.getMerchantId(), payment.getCurrencyCode());
+
+		double payerBalance = payerWallet.get(0).getAmount();
+		double payeeBalance = payeeWallet.get(0).getAmount();
+		payerWallet.get(0).setAmount(payerBalance - payment.getAmount());
+		payeeWallet.get(0).setAmount(payeeBalance + payment.getAmount());
+	}
 
 	@Override
 	public Payment savePayment(Payment payment) {
 		validate(payment);
+		applyPayment(payment);
+		
 		payment.setStatus(PaymentStatusEnum.PENDING.getCode());
-
-		// TODO: PAYEMENT ID
-		if (payment.getId() == null)
-			payment.setId(sequenceGeneratorService.generateSequence(Payment.SEQUENCE_NAME));
-
+		
+		transactionService.createTransaction(payment);
+		
 		return paymentRepository.save(payment);
 	}
 
@@ -236,8 +273,11 @@ public class PaymentServiceImpl implements PaymentService {
 		List<Payment> result = new ArrayList<>();
 		for (Payment payment : payments) {
 			validate(payment);
-
+			applyPayment(payment);
 			payment.setStatus(PaymentStatusEnum.PENDING.getCode());
+			
+			transactionService.createTransaction(payment);
+			
 			result.add(paymentRepository.save(payment));
 		}
 		return result;
@@ -249,7 +289,7 @@ public class PaymentServiceImpl implements PaymentService {
 		if (payment == null) {
 			throw new DataNotFoundException("error_paymentNotFound");
 		}
-		if (payment.getStatus().equals(PaymentStatusEnum.PENDING.getCode())) {
+		if (!payment.getStatus().equals(PaymentStatusEnum.PENDING.getCode())) {
 			throw new BusinessException("error_paymentNotPending");
 		}
 		payment.setStatus(PaymentStatusEnum.CANCELLED.getCode());

@@ -7,6 +7,8 @@ import com.zfinance.dto.request.coin.WalletBody;
 import com.zfinance.orm.coin.Wallet;
 
 public interface WalletService {
+	
+	public List<Wallet> searchWalletsByUserAndCurrency(String userId, String currency);
 
 	public List<Wallet> getWallets();
 
@@ -19,6 +21,8 @@ public interface WalletService {
 	public Wallet deleteWallet(String serial);
 
 	public List<Wallet> getWalletsByUserId(String userId);
+	
+	public List<Wallet> getWalletBySerial(String serial);
 
 	public List<Wallet> getWalletsByOrganizationId(String organizationId);
 

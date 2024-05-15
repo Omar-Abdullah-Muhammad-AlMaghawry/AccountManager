@@ -2,7 +2,6 @@ package com.zfinance.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -61,7 +60,7 @@ public class ExcelParser {
                 
                 Cell dateCell = row.getCell(6);
                 if (dateCell != null) {
-                    paymentRecord.setDate(LocalDate.parse(dateCell.getStringCellValue()));
+                    paymentRecord.setDate(dateCell.getStringCellValue());
                 }
                 
                 Cell groupIdCell = row.getCell(7);

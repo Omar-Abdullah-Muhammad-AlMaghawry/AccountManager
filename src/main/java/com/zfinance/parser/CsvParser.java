@@ -20,7 +20,7 @@ public class CsvParser {
             paymentRecord.setPayoneerPaymentId(row[3]);
             paymentRecord.setPayeeName(row[4]);
             paymentRecord.setCompanyName(row[5]);
-            paymentRecord.setDate(LocalDate.parse(row[6]));
+            paymentRecord.setDate(row[6]);
             paymentRecord.setAmount(Double.parseDouble(row[7]));
             paymentRecord.setStatus(row[8]);
             paymentRecord.setDescription(row[9]);
