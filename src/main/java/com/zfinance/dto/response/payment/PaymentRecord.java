@@ -54,4 +54,7 @@ public class PaymentRecord {
     
     @XmlElement
 	private String currencyCode;
+    
+    @XmlElement
+    private String partnerId;
 }

@@ -28,4 +28,5 @@ public class PaymentFilter {
 	private String groupId;
 	private String payoutMethod;
 	private List<String> currencyCodes;
+	private String partnerId;
 }

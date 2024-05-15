@@ -97,6 +97,9 @@ public class PaymentServiceImpl implements PaymentService {
 			if (paymentFilter.getPayoutMethod() != null) {
 				criteria.and("payoutMethod").in(paymentFilter.getPayoutMethod());
 			}
+			if (paymentFilter.getPartnerId() != null) {
+				criteria.and("partnerId").in(paymentFilter.getPartnerId());
+			}
 		}
 
 		Query query = new Query(criteria);
@@ -192,6 +195,13 @@ public class PaymentServiceImpl implements PaymentService {
 					query.with(Sort.by(Sort.Order.desc("payoutMethoud")));
 				}
 			}
+			if (paymentSort.getPartnerId() != null) {
+				if (paymentSort.getPartnerId().equalsIgnoreCase("asc")) {
+					query.with(Sort.by(Sort.Order.asc("partnerId")));
+				} else {
+					query.with(Sort.by(Sort.Order.desc("partnerId")));
+				}
+			}
 		}
 
 		return mongoTemplate.find(query, Payment.class);
@@ -204,7 +214,7 @@ public class PaymentServiceImpl implements PaymentService {
 	// TODO: PAYMENT_ID IS UNIQUE .. to be generative
 	//TODO: Download an example of excel sheet to fill it
 
-		if (payment.getPayeeId() == null || payment.getPayeeName() == null) {
+		if (payment.getPayeeId() == null) {
 			throw new BusinessException("error_payeeDoesNotExist");
 		}
 		if (payment.getPayeeId().equals(payment.getMerchantId())) {
@@ -265,6 +275,9 @@ public class PaymentServiceImpl implements PaymentService {
 		
 		transactionService.createTransaction(payment);
 		
+		if (payment.getId() == null) {
+			payment.setId(sequenceGeneratorService.generateSequence(Payment.SEQUENCE_NAME));
+		}
 		return paymentRepository.save(payment);
 	}
 

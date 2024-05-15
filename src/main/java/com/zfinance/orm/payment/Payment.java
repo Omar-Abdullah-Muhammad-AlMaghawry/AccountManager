@@ -60,6 +60,9 @@ public class Payment {
 	
 	@Field("currency_code")
 	private String currencyCode;
+	
+	@Field("partner_id")
+	private String partnerId;
 
 	@Transient
 	public static final String SEQUENCE_NAME = "payment_sequence";

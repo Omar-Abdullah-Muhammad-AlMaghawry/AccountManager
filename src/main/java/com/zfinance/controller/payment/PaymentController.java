@@ -157,6 +157,7 @@ public class PaymentController {
 
 	private ResponseEntity<String> handleExcelUpload(InputStream inputStream) throws IOException,
 			EncryptedDocumentException, InvalidFormatException {
+		System.out.println("hello");
 		List<PaymentRecord> paymentRecords = excelParser.parse(inputStream);
 
 		paymentService.savePayments(PaymentMapper.INSTANCE.mapPaymentRecords(paymentRecords));

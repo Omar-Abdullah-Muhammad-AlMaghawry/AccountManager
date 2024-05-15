@@ -23,4 +23,5 @@ public class PaymentSort {
 	private String groupId;
 	private String payoutMethod;
 	private String currencyCode;
+	private String partnerId;
 }

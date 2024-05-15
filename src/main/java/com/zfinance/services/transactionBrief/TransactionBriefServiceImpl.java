@@ -10,14 +10,17 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import com.zfinance.dto.request.extenrnal.UsersFilter;
 import com.zfinance.dto.response.transactionBrief.FundingDto;
 import com.zfinance.dto.response.transactionBrief.PayoutDto;
 import com.zfinance.dto.response.transactionBrief.RunningBalanceDto;
+import com.zfinance.dto.response.user.UserRecord;
 import com.zfinance.orm.coin.Wallet;
 import com.zfinance.orm.transaction.Transaction;
 import com.zfinance.orm.transactionBrief.TransactionBrief;
 import com.zfinance.repositories.transactionBrief.TransactionBriefRepository;
 import com.zfinance.services.coin.WalletService;
+import com.zfinance.services.external.UserService;
 
 @Service
 public class TransactionBriefServiceImpl implements TransactionBriefService {
@@ -30,6 +33,9 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 	
 	@Autowired
 	private MongoTemplate mongoTemplate;
+	
+	@Autowired
+	private UserService userService;
 
 	public TransactionBrief createTransactionBrief(Transaction transaction) {
 		TransactionBrief transactionBrief = new TransactionBrief();
@@ -69,7 +75,13 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 		
 		List<FundingDto> fundings = new ArrayList<>();
 		for (TransactionBrief transactionBrief : fundingTransactionBriefs) {
-			fundings.add(new FundingDto(transactionBrief.getFromUserId(), transactionBrief.getAmount()));
+			UsersFilter usersFilter = new UsersFilter();
+			List<String> id = new ArrayList<>();
+			id.add(transactionBrief.getFromUserId());
+			usersFilter.setIds(id);
+			UserRecord user = userService.searchUsers(usersFilter).get(0);
+			
+			fundings.add(new FundingDto(user.getEmail(), transactionBrief.getAmount()));
 		}
 		
 		return fundings;
@@ -85,7 +97,13 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 		
 		List<PayoutDto> payouts = new ArrayList<>();
 		for (TransactionBrief transactionBrief : payoutTransactionBriefs) {
-			payouts.add(new PayoutDto(transactionBrief.getToUserId(), transactionBrief.getAmount()));
+			UsersFilter usersFilter = new UsersFilter();
+			List<String> id = new ArrayList<>();
+			id.add(transactionBrief.getFromUserId());
+			usersFilter.setIds(id);
+			UserRecord user = userService.searchUsers(usersFilter).get(0);
+			
+			payouts.add(new PayoutDto(user.getEmail(), transactionBrief.getAmount()));
 		}
 		
 		return payouts;
