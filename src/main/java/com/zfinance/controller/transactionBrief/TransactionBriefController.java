@@ -21,19 +21,24 @@ public class TransactionBriefController {
 
 	@Autowired
 	private TransactionBriefService transactionBriefService;
-	
+
 	@GetMapping("/fundings/{userId}")
 	public List<FundingDto> getFundings(@PathVariable String userId) {
 		return transactionBriefService.getFundings(userId);
 	}
-	
+
 	@GetMapping("/payouts/{userId}")
 	public List<PayoutDto> getPayouts(@PathVariable String userId) {
 		return transactionBriefService.getPayouts(userId);
 	}
-	
+
 	@GetMapping("/runningBalance/{userId}")
 	public List<RunningBalanceDto> getRunningBalance(@PathVariable String userId) {
 		return transactionBriefService.getRunningBalance(userId);
+	}
+
+	@GetMapping("/runningBalance/signedIn")
+	public List<RunningBalanceDto> getSignedInRunningBalance() {
+		return transactionBriefService.getSignedInRunningBalance();
 	}
 }

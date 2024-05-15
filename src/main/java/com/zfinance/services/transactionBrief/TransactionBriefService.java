@@ -9,15 +9,17 @@ import com.zfinance.orm.transaction.Transaction;
 import com.zfinance.orm.transactionBrief.TransactionBrief;
 
 public interface TransactionBriefService {
-	
+
 	public TransactionBrief createTransactionBrief(Transaction transaction);
-	
+
 	public List<TransactionBrief> getTransactionBriefsInLast30Days(String userId);
-	
+
 	public List<FundingDto> getFundings(String userId);
-	
+
 	public List<PayoutDto> getPayouts(String userId);
 
 	public List<RunningBalanceDto> getRunningBalance(String userId);
+
+	public List<RunningBalanceDto> getSignedInRunningBalance();
 
 }

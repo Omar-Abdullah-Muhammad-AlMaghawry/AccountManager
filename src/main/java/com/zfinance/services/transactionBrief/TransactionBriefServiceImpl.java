@@ -10,43 +10,52 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import com.zfinance.config.filters.TokenAuthorizationFilter;
 import com.zfinance.dto.response.transactionBrief.FundingDto;
 import com.zfinance.dto.response.transactionBrief.PayoutDto;
 import com.zfinance.dto.response.transactionBrief.RunningBalanceDto;
+import com.zfinance.dto.response.user.UserRecord;
 import com.zfinance.orm.coin.Wallet;
 import com.zfinance.orm.transaction.Transaction;
 import com.zfinance.orm.transactionBrief.TransactionBrief;
 import com.zfinance.repositories.transactionBrief.TransactionBriefRepository;
 import com.zfinance.services.coin.WalletService;
+import com.zfinance.services.external.AuthManagerService;
 
 @Service
 public class TransactionBriefServiceImpl implements TransactionBriefService {
-	
+
 	@Autowired
 	private WalletService walletService;
-	
+
 	@Autowired
 	private TransactionBriefRepository transactionBriefRepository;
-	
+
+	@Autowired
+	private AuthManagerService authManagerService;
+
+	@Autowired
+	private TokenAuthorizationFilter tokenAuthorizationFilter;
+
 	@Autowired
 	private MongoTemplate mongoTemplate;
 
 	public TransactionBrief createTransactionBrief(Transaction transaction) {
 		TransactionBrief transactionBrief = new TransactionBrief();
-		
+
 		Wallet payee = walletService.getWalletBySerial(transaction.getFrom().getSerial()).get(0);
 		Wallet payer = walletService.getWalletBySerial(transaction.getTo().getSerial()).get(0);
-		
+
 		// ToDo: check if more details needed
 		transactionBrief.setFromUserId(payer.getUserId());
 		transactionBrief.setToUserId(payee.getUserId());
 		transactionBrief.setBalanceFrom(payer.getAmount());
 		transactionBrief.setBalanceTo(payee.getAmount());
-		
+
 		transactionBrief.setTransactionId(transaction.getId());
 		transactionBrief.setAmount(transaction.getAmount());
 		transactionBrief.setType(transaction.getType());
-		
+
 		return transactionBriefRepository.save(transactionBrief);
 	}
 
@@ -55,7 +64,7 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DATE, -30);
 		query.addCriteria(Criteria.where("date").gte(cal.getTime()).and(userId));
-		
+
 		return mongoTemplate.find(query, TransactionBrief.class);
 	}
 
@@ -65,13 +74,13 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DATE, -30);
 		query.addCriteria(Criteria.where("date").gte(cal.getTime()).and("from_user_id").is(userId));
-		List<TransactionBrief> fundingTransactionBriefs= mongoTemplate.find(query, TransactionBrief.class);
-		
+		List<TransactionBrief> fundingTransactionBriefs = mongoTemplate.find(query, TransactionBrief.class);
+
 		List<FundingDto> fundings = new ArrayList<>();
 		for (TransactionBrief transactionBrief : fundingTransactionBriefs) {
 			fundings.add(new FundingDto(transactionBrief.getFromUserId(), transactionBrief.getAmount()));
 		}
-		
+
 		return fundings;
 	}
 
@@ -81,13 +90,13 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DATE, -30);
 		query.addCriteria(Criteria.where("date").gte(cal.getTime()).and("to_user_id").is(userId));
-		List<TransactionBrief> payoutTransactionBriefs= mongoTemplate.find(query, TransactionBrief.class);
-		
+		List<TransactionBrief> payoutTransactionBriefs = mongoTemplate.find(query, TransactionBrief.class);
+
 		List<PayoutDto> payouts = new ArrayList<>();
 		for (TransactionBrief transactionBrief : payoutTransactionBriefs) {
 			payouts.add(new PayoutDto(transactionBrief.getToUserId(), transactionBrief.getAmount()));
 		}
-		
+
 		return payouts;
 	}
 
@@ -97,13 +106,12 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DATE, -30);
 		query1.addCriteria(Criteria.where("date").gte(cal.getTime()).and("from_user_id").is(userId));
-		List<TransactionBrief> fundingTransactionBriefs= mongoTemplate.find(query1, TransactionBrief.class);
-		
+		List<TransactionBrief> fundingTransactionBriefs = mongoTemplate.find(query1, TransactionBrief.class);
+
 		Query query2 = new Query();
 		query2.addCriteria(Criteria.where("date").gte(cal.getTime()).and("to_user_id").is(userId));
-		List<TransactionBrief> payoutTransactionBriefs= mongoTemplate.find(query2, TransactionBrief.class);
-		
-		
+		List<TransactionBrief> payoutTransactionBriefs = mongoTemplate.find(query2, TransactionBrief.class);
+
 		List<RunningBalanceDto> runningBalance = new ArrayList<>();
 		for (TransactionBrief transactionBrief : fundingTransactionBriefs) {
 			runningBalance.add(new RunningBalanceDto(transactionBrief.getDate(), transactionBrief.getBalanceFrom()));
@@ -111,9 +119,15 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 		for (TransactionBrief transactionBrief : payoutTransactionBriefs) {
 			runningBalance.add(new RunningBalanceDto(transactionBrief.getDate(), transactionBrief.getBalanceTo()));
 		}
-		
+
 		return runningBalance;
 	}
-	
-	
+
+	@Override
+	public List<RunningBalanceDto> getSignedInRunningBalance() {
+		String token = tokenAuthorizationFilter.getToken();
+		UserRecord user = authManagerService.getUserFromToken(token);
+		return getRunningBalance(user.getId());
+	}
+
 }
