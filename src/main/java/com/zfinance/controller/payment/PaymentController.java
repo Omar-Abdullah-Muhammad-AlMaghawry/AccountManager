@@ -58,21 +58,19 @@ public class PaymentController {
 
 	@Autowired
 	private PaymentService paymentService;
-	
+
 	@Autowired
 	private RngService rngService;
 
-	
-    @GetMapping("/generate-paymentId")
-    public String generateRandomId() {
-        return rngService.getRandomCodeOfSize8();
-    }
+	@GetMapping("/generate-paymentId")
+	public String generateRandomId() {
+		return rngService.getRandomCodeOfSize8();
+	}
 
 	@PostMapping
 	public PaginationResponse<PaymentRecord> getRecords(
 			@RequestBody PaginationRequestOptions<PaymentFilter, PaymentSort> options) {
 
-		
 		List<Payment> payments = paymentService.searchPayments(options);
 
 		PaginationResponse<PaymentRecord> paginationResponse = new PaginationResponse<>();
@@ -82,9 +80,9 @@ public class PaymentController {
 		paginationResponse.setPageSize(options.getPageSize() != null ? Integer.valueOf(options.getPageSize()) : null);
 		paginationResponse.setPageNumber(options.getPageNumber() != null ? Integer.valueOf(options.getPageNumber())
 				: null);
-		
-        Integer totalPages = Integer.valueOf(payments.size() / 5);
-        paginationResponse.setTotalPages(totalPages);
+
+		Integer totalPages = Integer.valueOf(payments.size() / 5);
+		paginationResponse.setTotalPages(totalPages);
 
 		return paginationResponse;
 	}
@@ -115,21 +113,17 @@ public class PaymentController {
 	public PaymentRecord cancelPayment(@PathVariable String paymentId) {
 		return PaymentMapper.INSTANCE.mapPayment(paymentService.cancelPayment(paymentId));
 	}
-	
 
-    @GetMapping("/downloadSamplet")
-    public ResponseEntity<InputStreamResource> downloadExcelFile() throws IOException {
-        ClassPathResource file = new ClassPathResource("files/sample.xlsx");
+	@PostMapping("/downloadSamplet")
+	public ResponseEntity<InputStreamResource> downloadExcelFile() throws IOException {
+		ClassPathResource file = new ClassPathResource("files/sample.xlsx");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=sample.xlsx");
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=sample.xlsx");
 
-        return ResponseEntity.ok()
-                .headers(headers)
-                .contentLength(file.contentLength())
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(new InputStreamResource(file.getInputStream()));
-    }
+		return ResponseEntity.ok().headers(headers).contentLength(file.contentLength()).contentType(
+				MediaType.APPLICATION_OCTET_STREAM).body(new InputStreamResource(file.getInputStream()));
+	}
 
 	@PostMapping("/upload")
 	public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) {

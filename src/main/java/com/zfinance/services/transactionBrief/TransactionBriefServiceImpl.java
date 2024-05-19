@@ -3,6 +3,7 @@ package com.zfinance.services.transactionBrief;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,10 +44,10 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
-	
+
 	@Autowired
 	private UserService userService;
-	
+
 	public List<TransactionBrief> getAllTransactionBriefs() {
 		List<TransactionBrief> res = transactionBriefRepository.findAll();
 		return res;
@@ -67,15 +68,14 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 		transactionBrief.setTransactionId(transaction.getId());
 		transactionBrief.setAmount(transaction.getAmount());
 		transactionBrief.setType(transaction.getType());
-		
+
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		try {
-		transactionBrief.setDate(formatter.parse(transaction.getCreatedAt()));
+			transactionBrief.setDate(formatter.parse(transaction.getCreatedAt()));
 		} catch (ParseException e) {
 			// Todo
-        }
-		
-		
+		}
+
 		return transactionBriefRepository.save(transactionBrief);
 	}
 
@@ -103,7 +103,7 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 			id.add(transactionBrief.getFromUserId());
 			usersFilter.setIds(id);
 			UserRecord user = userService.searchUsers(usersFilter).get(0);
-			
+
 			fundings.add(new FundingDto(user.getEmail(), transactionBrief.getAmount()));
 		}
 
@@ -125,7 +125,7 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 			id.add(transactionBrief.getFromUserId());
 			usersFilter.setIds(id);
 			UserRecord user = userService.searchUsers(usersFilter).get(0);
-			
+
 			payouts.add(new PayoutDto(user.getEmail(), transactionBrief.getAmount()));
 		}
 
@@ -134,20 +134,37 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 
 	@Override
 	public List<RunningBalanceDto> getRunningBalance(String userId) {
-		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.DATE, -30);
-		
+		// Get the current date
+		Date currentDate = new Date();
+
+		// Create a Calendar instance and set it to the current date
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(currentDate);
+
+		// Subtract 30 days from the calendar
+		calendar.add(Calendar.DAY_OF_MONTH, -30);
+
+		// Get the updated date
+		Date oneMonthAgo = calendar.getTime();
+
 		List<TransactionBrief> fundingTransactionBriefs = transactionBriefRepository.findAllByFromUserId(userId);
 		List<TransactionBrief> payoutTransactionBriefs = transactionBriefRepository.findAllByToUserId(userId);
 
 		List<RunningBalanceDto> runningBalance = new ArrayList<>();
 		for (TransactionBrief transactionBrief : fundingTransactionBriefs) {
-			runningBalance.add(new RunningBalanceDto(transactionBrief.getDate(), transactionBrief.getBalanceFrom()));
+			Date date = transactionBrief.getDate();
+
+			if (date.before(currentDate) && date.after(oneMonthAgo))
+				runningBalance.add(new RunningBalanceDto(date, transactionBrief.getBalanceFrom()));
+
 		}
 		for (TransactionBrief transactionBrief : payoutTransactionBriefs) {
-			runningBalance.add(new RunningBalanceDto(transactionBrief.getDate(), transactionBrief.getBalanceTo()));
+			Date date = transactionBrief.getDate();
+
+			if (date != null && date.before(currentDate) && date.after(oneMonthAgo))
+				runningBalance.add(new RunningBalanceDto(transactionBrief.getDate(), transactionBrief.getBalanceTo()));
 		}
-		
+
 		return runningBalance;
 	}
 
@@ -155,8 +172,7 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 	public List<RunningBalanceDto> getSignedInRunningBalance() {
 		String token = tokenAuthorizationFilter.getToken();
 		UserRecord user = authManagerService.getUserFromToken(token);
-		
-	
+
 		return getRunningBalance(user.getId());
 	}
 
