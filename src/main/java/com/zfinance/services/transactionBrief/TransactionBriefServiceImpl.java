@@ -1,5 +1,6 @@
 package com.zfinance.services.transactionBrief;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -10,8 +11,9 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import com.zfinance.dto.request.extenrnal.UsersFilter;
+import com.ibm.icu.text.SimpleDateFormat;
 import com.zfinance.config.filters.TokenAuthorizationFilter;
+import com.zfinance.dto.request.extenrnal.UsersFilter;
 import com.zfinance.dto.response.transactionBrief.FundingDto;
 import com.zfinance.dto.response.transactionBrief.PayoutDto;
 import com.zfinance.dto.response.transactionBrief.RunningBalanceDto;
@@ -21,8 +23,8 @@ import com.zfinance.orm.transaction.Transaction;
 import com.zfinance.orm.transactionBrief.TransactionBrief;
 import com.zfinance.repositories.transactionBrief.TransactionBriefRepository;
 import com.zfinance.services.coin.WalletService;
-import com.zfinance.services.external.UserService;
 import com.zfinance.services.external.AuthManagerService;
+import com.zfinance.services.external.UserService;
 
 @Service
 public class TransactionBriefServiceImpl implements TransactionBriefService {
@@ -44,6 +46,11 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 	
 	@Autowired
 	private UserService userService;
+	
+	public List<TransactionBrief> getAllTransactionBriefs() {
+		List<TransactionBrief> res = transactionBriefRepository.findAll();
+		return res;
+	}
 
 	public TransactionBrief createTransactionBrief(Transaction transaction) {
 		TransactionBrief transactionBrief = new TransactionBrief();
@@ -60,7 +67,15 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 		transactionBrief.setTransactionId(transaction.getId());
 		transactionBrief.setAmount(transaction.getAmount());
 		transactionBrief.setType(transaction.getType());
-
+		
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		try {
+		transactionBrief.setDate(formatter.parse(transaction.getCreatedAt()));
+		} catch (ParseException e) {
+			// Todo
+        }
+		
+		
 		return transactionBriefRepository.save(transactionBrief);
 	}
 
@@ -119,15 +134,11 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 
 	@Override
 	public List<RunningBalanceDto> getRunningBalance(String userId) {
-		Query query1 = new Query();
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DATE, -30);
-		query1.addCriteria(Criteria.where("date").gte(cal.getTime()).and("from_user_id").is(userId));
-		List<TransactionBrief> fundingTransactionBriefs = mongoTemplate.find(query1, TransactionBrief.class);
-
-		Query query2 = new Query();
-		query2.addCriteria(Criteria.where("date").gte(cal.getTime()).and("to_user_id").is(userId));
-		List<TransactionBrief> payoutTransactionBriefs = mongoTemplate.find(query2, TransactionBrief.class);
+		
+		List<TransactionBrief> fundingTransactionBriefs = transactionBriefRepository.findAllByFromUserId(userId);
+		List<TransactionBrief> payoutTransactionBriefs = transactionBriefRepository.findAllByToUserId(userId);
 
 		List<RunningBalanceDto> runningBalance = new ArrayList<>();
 		for (TransactionBrief transactionBrief : fundingTransactionBriefs) {
@@ -136,7 +147,7 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 		for (TransactionBrief transactionBrief : payoutTransactionBriefs) {
 			runningBalance.add(new RunningBalanceDto(transactionBrief.getDate(), transactionBrief.getBalanceTo()));
 		}
-
+		
 		return runningBalance;
 	}
 
@@ -144,6 +155,8 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 	public List<RunningBalanceDto> getSignedInRunningBalance() {
 		String token = tokenAuthorizationFilter.getToken();
 		UserRecord user = authManagerService.getUserFromToken(token);
+		
+	
 		return getRunningBalance(user.getId());
 	}
 

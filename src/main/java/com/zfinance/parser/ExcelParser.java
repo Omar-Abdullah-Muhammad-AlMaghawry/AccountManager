@@ -2,7 +2,11 @@ package com.zfinance.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -34,6 +38,8 @@ public class ExcelParser {
 			Sheet sheet = workbook.getSheetAt(0);
 			Iterator<Row> rowIterator = sheet.iterator();
 			List<PaymentRecord> paymentRecords = new ArrayList<>();
+			
+			if (rowIterator.hasNext()) rowIterator.next();
 			while (rowIterator.hasNext()) {
 				Row row = rowIterator.next();
 				PaymentRecord paymentRecord = new PaymentRecord();
@@ -42,7 +48,7 @@ public class ExcelParser {
 //                if (idCell != null) {
 //                    paymentRecord.setId(idCell.getStringCellValue());
 //                }
-				
+								
 				
 				Cell partnerIdCell = row.getCell(0);
 				if (partnerIdCell != null) {
@@ -106,10 +112,14 @@ public class ExcelParser {
 				
 				String token = tokenAuthorizationFilter.getToken();
 				UserRecord user = authManagerService.getUserFromToken(token);
-				
 				paymentRecord.setMerchantId(user.getId());
+				
+				Date currentDate = Calendar.getInstance().getTime();
+				DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+				paymentRecord.setDate(dateFormat.format(currentDate));
 
                 paymentRecords.add(paymentRecord);
+                
 			}
 
 			return paymentRecords;

@@ -2,13 +2,14 @@ package com.zfinance.services.payment;
 
 import java.util.List;
 
+import com.zfinance.dto.request.PaginationRequestOptions;
 import com.zfinance.dto.request.payment.PaymentFilter;
 import com.zfinance.dto.request.payment.PaymentSort;
 import com.zfinance.orm.payment.Payment;
 
 public interface PaymentService {
 
-	public List<Payment> searchPayments(PaymentFilter paymentFilter, PaymentSort paymentSort);
+	public List<Payment> searchPayments(PaginationRequestOptions<PaymentFilter, PaymentSort> options);
 
 	public Payment savePayment(Payment payment);
 

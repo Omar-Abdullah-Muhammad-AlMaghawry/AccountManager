@@ -9,7 +9,11 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.poi.EncryptedDocumentException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -68,7 +72,8 @@ public class PaymentController {
 	public PaginationResponse<PaymentRecord> getRecords(
 			@RequestBody PaginationRequestOptions<PaymentFilter, PaymentSort> options) {
 
-		List<Payment> payments = paymentService.searchPayments(options.getFilter(), options.getSort());
+		
+		List<Payment> payments = paymentService.searchPayments(options);
 
 		PaginationResponse<PaymentRecord> paginationResponse = new PaginationResponse<>();
 		paginationResponse.setRecords(PaymentMapper.INSTANCE.mapPayments(payments));
@@ -77,6 +82,9 @@ public class PaymentController {
 		paginationResponse.setPageSize(options.getPageSize() != null ? Integer.valueOf(options.getPageSize()) : null);
 		paginationResponse.setPageNumber(options.getPageNumber() != null ? Integer.valueOf(options.getPageNumber())
 				: null);
+		
+        Integer totalPages = Integer.valueOf(payments.size() / 5);
+        paginationResponse.setTotalPages(totalPages);
 
 		return paginationResponse;
 	}
@@ -107,6 +115,21 @@ public class PaymentController {
 	public PaymentRecord cancelPayment(@PathVariable String paymentId) {
 		return PaymentMapper.INSTANCE.mapPayment(paymentService.cancelPayment(paymentId));
 	}
+	
+
+    @GetMapping("/downloadSamplet")
+    public ResponseEntity<InputStreamResource> downloadExcelFile() throws IOException {
+        ClassPathResource file = new ClassPathResource("files/sample.xlsx");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=sample.xlsx");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentLength(file.contentLength())
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(new InputStreamResource(file.getInputStream()));
+    }
 
 	@PostMapping("/upload")
 	public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) {
@@ -157,7 +180,6 @@ public class PaymentController {
 
 	private ResponseEntity<String> handleExcelUpload(InputStream inputStream) throws IOException,
 			EncryptedDocumentException, InvalidFormatException {
-		System.out.println("hello");
 		List<PaymentRecord> paymentRecords = excelParser.parse(inputStream);
 
 		paymentService.savePayments(PaymentMapper.INSTANCE.mapPaymentRecords(paymentRecords));

@@ -1,7 +1,8 @@
 package com.zfinance.mapper;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import org.mapstruct.Mapper;
@@ -18,15 +19,15 @@ public interface PaymentMapper {
 
 	PaymentMapper INSTANCE = Mappers.getMapper(PaymentMapper.class);
 
-    @Mapping(target = "date", source = "date", dateFormat = "yyyy-MM-dd'T'HH:mm:ss")
+    @Mapping(target = "date", source = "date", dateFormat = "yyyy-MM-dd HH:mm:ss")
 	public PaymentRecord mapPayment(Payment payment);
 
-    default String mapDate(LocalDate date) {
-        return date != null ? date.toString() : null;
+    default String mapDate(Date date) {
+        return date != null ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date) : null;
     }
 
-    default LocalDate mapDate(String date) {
-        return date != null ? LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")) : null;
+    default Date mapDate(String date) throws ParseException {
+    	return date != null ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date) : null;
     }
     
 	public Payment mapPaymentRecord(PaymentRecord paymentRecord);

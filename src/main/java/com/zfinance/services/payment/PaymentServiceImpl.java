@@ -1,15 +1,19 @@
 package com.zfinance.services.payment;
 
+
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import com.zfinance.dto.request.PaginationRequestOptions;
 import com.zfinance.dto.request.extenrnal.UsersFilter;
 import com.zfinance.dto.request.payment.PaymentFilter;
 import com.zfinance.dto.request.payment.PaymentSort;
@@ -51,7 +55,9 @@ public class PaymentServiceImpl implements PaymentService {
 	private TransactionService transactionService;
 
 	@Override
-	public List<Payment> searchPayments(PaymentFilter paymentFilter, PaymentSort paymentSort) {
+	public List<Payment> searchPayments(PaginationRequestOptions<PaymentFilter, PaymentSort> options) {
+		PaymentFilter paymentFilter = options.getFilter();
+		PaymentSort paymentSort = options.getSort();
 		Criteria criteria = new Criteria();
 		if (paymentFilter != null) {
 			if (paymentFilter.getId() != null) {
@@ -204,7 +210,15 @@ public class PaymentServiceImpl implements PaymentService {
 			}
 		}
 
-		return mongoTemplate.find(query, Payment.class);
+		
+		int page = (null != options.getPageNumber()) ? Integer.parseInt(options.getPageNumber()) : 0;
+        int size = (null != options.getPageSize()) ? Integer.parseInt(options.getPageSize()) : 0;
+
+        if (page != 0 && size != 0) {
+            Pageable pageable = Pageable.ofSize(size).withPage(page);
+            return mongoTemplate.find(query.with(pageable), Payment.class);
+        }
+        return mongoTemplate.find(query, Payment.class);
 	}
 	
 	private void validate(Payment payment) {
@@ -247,7 +261,7 @@ public class PaymentServiceImpl implements PaymentService {
 			throw new BusinessException("error_notEnoughBalance");
 		}
 
-		if (payment.getPaymentId() == null || payment.getDate() == null || payment.getAmount() == null) {
+		if (payment.getPaymentId() == null || payment.getAmount() == null || payment.getDate() == null) {
 			throw new BusinessException("error_DataNotComplete");
 		}
 		

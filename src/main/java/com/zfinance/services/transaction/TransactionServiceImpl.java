@@ -1,5 +1,6 @@
 package com.zfinance.services.transaction;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -173,6 +174,9 @@ public class TransactionServiceImpl implements TransactionService {
 		transaction.setAmount(payment.getAmount());
 		transaction.setDescription(payment.getDescription());
 		transaction.setStatus(payment.getStatus());
+		
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		transaction.setCreatedAt(formatter.format(payment.getDate()));
 		
 		
 		return this.save(transaction);
