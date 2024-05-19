@@ -59,7 +59,7 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 		Wallet payee = walletService.getWalletBySerial(transaction.getFrom().getSerial()).get(0);
 		Wallet payer = walletService.getWalletBySerial(transaction.getTo().getSerial()).get(0);
 
-		// ToDo: check if more details needed
+		// TODO: check if more details needed
 		transactionBrief.setFromUserId(payer.getUserId());
 		transactionBrief.setToUserId(payee.getUserId());
 		transactionBrief.setBalanceFrom(payer.getAmount());
