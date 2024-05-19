@@ -114,7 +114,7 @@ public class ExcelParser {
 				paymentRecord.setMerchantId(user.getId());
 
 				Date currentDate = new Date();
-				DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+				DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 				paymentRecord.setDate(dateFormat.format(currentDate));
 
 				paymentRecords.add(paymentRecord);

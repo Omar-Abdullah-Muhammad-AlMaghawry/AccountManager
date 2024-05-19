@@ -134,6 +134,8 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 
 	@Override
 	public List<RunningBalanceDto> getRunningBalance(String userId) {
+		// TODO: NEED TO GET BY DESC. DATE
+
 		// Get the current date
 		Date currentDate = new Date();
 
@@ -154,14 +156,14 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 		for (TransactionBrief transactionBrief : fundingTransactionBriefs) {
 			Date date = transactionBrief.getDate();
 
-			if (date.before(currentDate) && date.after(oneMonthAgo))
+			if (date != null && !date.after(currentDate) && !date.before(oneMonthAgo))
 				runningBalance.add(new RunningBalanceDto(date, transactionBrief.getBalanceFrom()));
 
 		}
 		for (TransactionBrief transactionBrief : payoutTransactionBriefs) {
 			Date date = transactionBrief.getDate();
 
-			if (date != null && date.before(currentDate) && date.after(oneMonthAgo))
+			if (date != null && !date.after(currentDate) && !date.before(oneMonthAgo))
 				runningBalance.add(new RunningBalanceDto(transactionBrief.getDate(), transactionBrief.getBalanceTo()));
 		}
 
