@@ -26,7 +26,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(DataNotFoundException.class)
 	protected ResponseEntity<Object> handleDataNotFoundException(DataNotFoundException ex, WebRequest request) {
 		logger.error(ex);
-		return ResponseEntity.badRequest().body(new ErrorResponse("error_invalidRequestParams"));
+		return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
 	}
 
 	@ExceptionHandler(SQLIntegrityConstraintViolationException.class)

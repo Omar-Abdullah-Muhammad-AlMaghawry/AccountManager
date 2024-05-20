@@ -1,7 +1,5 @@
 package com.zfinance.services.payment;
 
-
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,10 +45,10 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Autowired
 	private CurrencyService currencyService;
-	
+
 	@Autowired
 	private WalletService walletService;
-	
+
 	@Autowired
 	private TransactionService transactionService;
 
@@ -80,13 +78,15 @@ public class PaymentServiceImpl implements PaymentService {
 			}
 			if (paymentFilter.getDateFrom() != null && paymentFilter.getDateTo() != null) {
 				criteria.and("date").gte(paymentFilter.getDateFrom()).lte(paymentFilter.getDateTo());
-	        } else if (paymentFilter.getDateFrom() != null) {
-	            criteria = criteria.and("date").gte(paymentFilter.getDateFrom());
-	        } else if (paymentFilter.getDateTo() != null) {
-	            criteria = criteria.and("date").lte(paymentFilter.getDateTo());
-	        }
+			} else if (paymentFilter.getDateFrom() != null) {
+				criteria = criteria.and("date").gte(paymentFilter.getDateFrom());
+			} else if (paymentFilter.getDateTo() != null) {
+				criteria = criteria.and("date").lte(paymentFilter.getDateTo());
+			}
 			if (paymentFilter.getAmountFrom() != null || paymentFilter.getAmountTo() != null) {
-				criteria.and("amount").gte((paymentFilter.getAmountFrom() == null ? Double.MIN_VALUE : paymentFilter.getAmountFrom())).lte(paymentFilter.getAmountTo() == null ? Double.MAX_VALUE : paymentFilter.getAmountTo());
+				criteria.and("amount").gte((paymentFilter.getAmountFrom() == null ? Double.MIN_VALUE
+						: paymentFilter.getAmountFrom())).lte(paymentFilter.getAmountTo() == null ? Double.MAX_VALUE
+								: paymentFilter.getAmountTo());
 			}
 			if (paymentFilter.getStatus() != null) {
 				criteria.and("status").in(paymentFilter.getStatus());
@@ -210,23 +210,19 @@ public class PaymentServiceImpl implements PaymentService {
 			}
 		}
 
-		
 		int page = (null != options.getPageNumber()) ? Integer.parseInt(options.getPageNumber()) : 0;
-        int size = (null != options.getPageSize()) ? Integer.parseInt(options.getPageSize()) : 0;
+		int size = (null != options.getPageSize()) ? Integer.parseInt(options.getPageSize()) : 0;
 
-        if (page != 0 && size != 0) {
-            Pageable pageable = Pageable.ofSize(size).withPage(page);
-            return mongoTemplate.find(query.with(pageable), Payment.class);
-        }
-        return mongoTemplate.find(query, Payment.class);
+		if (size != 0) {
+			Pageable pageable = Pageable.ofSize(size).withPage(page);
+			return mongoTemplate.find(query.with(pageable), Payment.class);
+		}
+		return mongoTemplate.find(query, Payment.class);
 	}
-	
-	private void validate(Payment payment) {
-		
-		
 
-	// TODO: PAYMENT_ID IS UNIQUE .. to be generative
-	//TODO: Download an example of excel sheet to fill it
+	private void validate(Payment payment) {
+
+		// TODO: PAYMENT_ID IS UNIQUE .. to be generative
 
 		if (payment.getPayeeId() == null) {
 			throw new BusinessException("error_payeeDoesNotExist");
@@ -239,24 +235,26 @@ public class PaymentServiceImpl implements PaymentService {
 		id.add(payment.getPayeeId());
 		usersFilter.setIds(id);
 
-
-		// TODO: CHECK W/ OSAMA use email until now .. after a while we will use username at regestration to be unique
+		// TODO: CHECK W/ OSAMA use email until now .. after a while we will use
+		// username at regestration to be unique
 		usersFilter.setEmail(payment.getPayeeName());
 
 		List<UserRecord> user = userService.searchUsers(usersFilter);
 		if (user == null || user.size() == 0) {
 			throw new DataNotFoundException("error_userDoesNotExist");
 		}
-		
-		List<Wallet> payeeWallet = walletService.searchWalletsByUserAndCurrency(payment.getPayeeId(), payment.getCurrencyCode());
+
+		List<Wallet> payeeWallet = walletService.searchWalletsByUserAndCurrency(payment.getPayeeId(), payment
+				.getCurrencyCode());
 		if (payeeWallet == null || payeeWallet.size() == 0) {
 			throw new BusinessException("error_payeeWalletDoesNotExist");
 		}
-		List<Wallet> payerWallet = walletService.searchWalletsByUserAndCurrency(payment.getMerchantId(), payment.getCurrencyCode());
+		List<Wallet> payerWallet = walletService.searchWalletsByUserAndCurrency(payment.getMerchantId(), payment
+				.getCurrencyCode());
 		if (payerWallet == null || payerWallet.size() == 0) {
 			throw new BusinessException("error_payerWalletDoesNotExist");
 		}
-		
+
 		if (payerWallet.get(0).getAmount() < payment.getAmount()) {
 			throw new BusinessException("error_notEnoughBalance");
 		}
@@ -264,15 +262,17 @@ public class PaymentServiceImpl implements PaymentService {
 		if (payment.getPaymentId() == null || payment.getAmount() == null || payment.getDate() == null) {
 			throw new BusinessException("error_DataNotComplete");
 		}
-		
+
 		if (paymentRepository.existsByPaymentId(payment.getPaymentId())) {
 			throw new BusinessException("error_PaymentIdAlreadyExists");
 		}
 	}
-	
+
 	private void applyPayment(Payment payment) {
-		List<Wallet> payeeWallet = walletService.searchWalletsByUserAndCurrency(payment.getPayeeId(), payment.getCurrencyCode());
-		List<Wallet> payerWallet = walletService.searchWalletsByUserAndCurrency(payment.getMerchantId(), payment.getCurrencyCode());
+		List<Wallet> payeeWallet = walletService.searchWalletsByUserAndCurrency(payment.getPayeeId(), payment
+				.getCurrencyCode());
+		List<Wallet> payerWallet = walletService.searchWalletsByUserAndCurrency(payment.getMerchantId(), payment
+				.getCurrencyCode());
 
 		double payerBalance = payerWallet.get(0).getAmount();
 		double payeeBalance = payeeWallet.get(0).getAmount();
@@ -282,13 +282,14 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Override
 	public Payment savePayment(Payment payment) {
+//		payment.setMerchantId("31");
 		validate(payment);
 		applyPayment(payment);
-		
+
 		payment.setStatus(PaymentStatusEnum.PENDING.getCode());
-		
+
 		transactionService.createTransaction(payment);
-		
+
 		if (payment.getId() == null) {
 			payment.setId(sequenceGeneratorService.generateSequence(Payment.SEQUENCE_NAME));
 		}
@@ -302,9 +303,9 @@ public class PaymentServiceImpl implements PaymentService {
 			validate(payment);
 			applyPayment(payment);
 			payment.setStatus(PaymentStatusEnum.PENDING.getCode());
-			
+
 			transactionService.createTransaction(payment);
-			
+
 			result.add(paymentRepository.save(payment));
 		}
 		return result;

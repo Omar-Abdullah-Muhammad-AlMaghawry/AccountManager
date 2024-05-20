@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -149,8 +150,10 @@ public class TransactionBriefServiceImpl implements TransactionBriefService {
 		// Get the updated date
 		Date oneMonthAgo = calendar.getTime();
 
-		List<TransactionBrief> fundingTransactionBriefs = transactionBriefRepository.findAllByFromUserId(userId);
-		List<TransactionBrief> payoutTransactionBriefs = transactionBriefRepository.findAllByToUserId(userId);
+		List<TransactionBrief> fundingTransactionBriefs = transactionBriefRepository.findAllByFromUserId(userId, Sort
+				.by(Sort.Direction.ASC, "date"));
+		List<TransactionBrief> payoutTransactionBriefs = transactionBriefRepository.findAllByToUserId(userId, Sort.by(
+				Sort.Direction.ASC, "date"));
 
 		List<RunningBalanceDto> runningBalance = new ArrayList<>();
 		for (TransactionBrief transactionBrief : fundingTransactionBriefs) {
