@@ -99,12 +99,22 @@ public class PaymentController {
 
 	@PostMapping("/create")
 	public PaymentRecord savePayment(@RequestBody PaymentRecord payment) {
+		payment.setIsIntegration(false);
 		return PaymentMapper.INSTANCE.mapPayment(paymentService.savePayment(PaymentMapper.INSTANCE.mapPaymentRecord(
 				payment)));
 	}
 
-	@PostMapping("/createAll")
-	public List<PaymentRecord> savePayment(@RequestBody List<PaymentRecord> payments) {
+	@PostMapping("/integration/create")
+	public PaymentRecord savePaymentIntegration(@RequestBody PaymentRecord payment) {
+		payment.setIsIntegration(true);
+		return PaymentMapper.INSTANCE.mapPayment(paymentService.savePayment(PaymentMapper.INSTANCE.mapPaymentRecord(
+				payment)));
+	}
+
+	@PostMapping("/integration/createAll")
+	public List<PaymentRecord> savePayments(@RequestBody List<PaymentRecord> payments) {
+		for (PaymentRecord paymentRecord : payments)
+			paymentRecord.setIsIntegration(true);
 		return PaymentMapper.INSTANCE.mapPayments(paymentService.savePayments(PaymentMapper.INSTANCE.mapPaymentRecords(
 				payments)));
 	}
@@ -135,7 +145,6 @@ public class PaymentController {
 			String fileExtension = getFileExtension(file.getOriginalFilename());
 			switch (fileExtension.toLowerCase()) {
 
-			// TODO: CHECK W/ OSAMA THE ORDER OF THE OBJECT
 			case "csv":
 				return handleCsvUpload(file.getInputStream());
 			case "xml":

@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import com.zfinance.config.filters.TokenAuthorizationFilter;
 import com.zfinance.dto.request.PaginationRequestOptions;
 import com.zfinance.dto.request.extenrnal.UsersFilter;
 import com.zfinance.dto.request.payment.PaymentFilter;
@@ -24,6 +25,7 @@ import com.zfinance.orm.payment.Payment;
 import com.zfinance.repositories.payment.PaymentRepository;
 import com.zfinance.services.coin.WalletService;
 import com.zfinance.services.database.sequence.SequenceGeneratorService;
+import com.zfinance.services.external.AuthManagerService;
 import com.zfinance.services.external.CurrencyService;
 import com.zfinance.services.external.UserService;
 import com.zfinance.services.transaction.TransactionService;
@@ -51,6 +53,12 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Autowired
 	private TransactionService transactionService;
+
+	@Autowired
+	private AuthManagerService authManagerService;
+
+	@Autowired
+	private TokenAuthorizationFilter tokenAuthorizationFilter;
 
 	@Override
 	public List<Payment> searchPayments(PaginationRequestOptions<PaymentFilter, PaymentSort> options) {
@@ -282,7 +290,12 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Override
 	public Payment savePayment(Payment payment) {
-//		payment.setMerchantId("31");
+		if (payment.getMerchantId() == null) {
+			String token = tokenAuthorizationFilter.getToken();
+			UserRecord user = authManagerService.getUserFromToken(token);
+			payment.setMerchantId(user.getId());
+
+		}
 		validate(payment);
 		applyPayment(payment);
 
@@ -305,6 +318,9 @@ public class PaymentServiceImpl implements PaymentService {
 			payment.setStatus(PaymentStatusEnum.PENDING.getCode());
 
 			transactionService.createTransaction(payment);
+
+			if (payment.getIsIntegration() == null)
+				payment.setIsIntegration(false);
 
 			result.add(paymentRepository.save(payment));
 		}

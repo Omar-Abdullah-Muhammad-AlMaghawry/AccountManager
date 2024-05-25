@@ -13,48 +13,51 @@ import lombok.Setter;
 @XmlRootElement(name = "paymentRecord")
 public class PaymentRecord {
 
-    @XmlElement
+	@XmlElement
 	private String id;
-    
-    @XmlElement
+
+	@XmlElement
 	private String payeeId;
-    
-    @XmlElement
+
+	@XmlElement
 	private String merchantId;
-    
-    @XmlElement
+
+	@XmlElement
 	private String paymentId;
-    
-    @XmlElement
+
+	@XmlElement
 	private String payoneerPaymentId;
-    
-    @XmlElement
+
+	@XmlElement
 	private String payeeName;
-    
-    @XmlElement
+
+	@XmlElement
 	private String companyName;
-    
-    @XmlElement
+
+	@XmlElement
 	private String date;
-    
-    @XmlElement
+
+	@XmlElement
 	private Double amount;
-    
-    @XmlElement
+
+	@XmlElement
 	private String status;
-    
-    @XmlElement
+
+	@XmlElement
 	private String description;
-    
-    @XmlElement
+
+	@XmlElement
 	private String groupId;
-    
-    @XmlElement
+
+	@XmlElement
 	private String payoutMethod;
-    
-    @XmlElement
+
+	@XmlElement
 	private String currencyCode;
-    
-    @XmlElement
-    private String partnerId;
+
+	@XmlElement
+	private String partnerId;
+
+	@XmlElement
+	private Boolean isIntegration;
 }
