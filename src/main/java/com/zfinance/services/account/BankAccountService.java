@@ -19,6 +19,8 @@ public interface BankAccountService {
 
 	public List<BankAccount> viewBankAccountsByUserId(String userId);
 
+	public BankAccount viewBankAccountById(String id);
+
 	public void approveBankAccount(String bankAccountId);
 
 	public void rejectBankAccount(String bankAccountId);

@@ -1,5 +1,6 @@
 package com.zfinance.services.coin;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.zfinance.config.filters.TokenAuthorizationFilter;
 import com.zfinance.dto.request.coin.UpdateWalletBody;
 import com.zfinance.dto.request.coin.WalletBody;
+import com.zfinance.dto.request.extenrnal.UsersFilter;
 import com.zfinance.dto.response.user.UserRecord;
 import com.zfinance.exceptions.BusinessException;
 import com.zfinance.exceptions.DataNotFoundException;
@@ -22,6 +24,7 @@ import com.zfinance.repositories.coin.WalletRepository;
 import com.zfinance.services.database.sequence.SequenceGeneratorService;
 import com.zfinance.services.external.AuthManagerService;
 import com.zfinance.services.external.IssuerService;
+import com.zfinance.services.external.UserService;
 
 @Service
 public class WalletServiceImpl implements WalletService {
@@ -36,6 +39,9 @@ public class WalletServiceImpl implements WalletService {
 	private AuthManagerService authManagerService;
 
 	@Autowired
+	private UserService userService;
+
+	@Autowired
 	private TokenAuthorizationFilter tokenAuthorizationFilter;
 
 	@Autowired
@@ -43,12 +49,12 @@ public class WalletServiceImpl implements WalletService {
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
-	
+
 	public List<Wallet> searchWalletsByUserAndCurrency(String userId, String currency) {
 		Criteria criteria = new Criteria();
 		criteria.and("userId").is(userId);
 		criteria.and("issuer.currency").is(currency);
-		
+
 		Query query = new Query(criteria);
 		return mongoTemplate.find(query, Wallet.class);
 	}
@@ -60,8 +66,15 @@ public class WalletServiceImpl implements WalletService {
 
 	@Override
 	public Wallet createWallet(WalletBody walletBody) {
-		String token = tokenAuthorizationFilter.getToken();
-		UserRecord user = authManagerService.getUserFromToken(token);
+		UserRecord user = null;
+		if (walletBody.getUserId() == null) {
+			String token = tokenAuthorizationFilter.getToken();
+			user = authManagerService.getUserFromToken(token);
+		} else {
+			UsersFilter usersFilter = new UsersFilter();
+			usersFilter.setIds(Collections.singletonList(walletBody.getUserId()));
+			user = userService.searchUsers(usersFilter).get(0);
+		}
 
 		Issuer issuerBody = issuerService.getIssuerById(walletBody.getIssuerId());
 

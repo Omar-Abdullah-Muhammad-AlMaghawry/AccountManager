@@ -3,6 +3,7 @@ package com.zfinance.controller.transfer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,12 +21,12 @@ public class TransferController {
 	private TransferService transferService;
 
 	@PostMapping
-	private TransfersTransaction executeTransfer(TransferBody transferBody) {
+	private TransfersTransaction executeTransfer(@RequestBody TransferBody transferBody) {
 		return transferService.executeTransfer(transferBody);
 	}
 
 	@PostMapping("/calculate")
-	private TransferCalculateResponse calculateCommissionFee(TransferBody transferBody) {
+	private TransferCalculateResponse calculateCommissionFee(@RequestBody TransferBody transferBody) {
 		return transferService.calculateCommissionFee(transferBody);
 	}
 

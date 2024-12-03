@@ -160,6 +160,7 @@ public class PaymentServiceImpl implements PaymentService {
 					query.with(Sort.by(Sort.Order.desc("companyName")));
 				}
 			}
+
 			if (paymentSort.getDate() != null) {
 				if (paymentSort.getDate().equalsIgnoreCase("asc")) {
 					query.with(Sort.by(Sort.Order.asc("date")));
@@ -221,6 +222,8 @@ public class PaymentServiceImpl implements PaymentService {
 		int page = (null != options.getPageNumber()) ? Integer.parseInt(options.getPageNumber()) : 0;
 		int size = (null != options.getPageSize()) ? Integer.parseInt(options.getPageSize()) : 0;
 
+//		query.with(Sort.by(Sort.Order.desc("date")));
+
 		if (size != 0) {
 			Pageable pageable = Pageable.ofSize(size).withPage(page);
 			return mongoTemplate.find(query.with(pageable), Payment.class);
@@ -232,24 +235,8 @@ public class PaymentServiceImpl implements PaymentService {
 
 		// TODO: PAYMENT_ID IS UNIQUE .. to be generative
 
-		if (payment.getPayeeId() == null) {
-			throw new BusinessException("error_payeeDoesNotExist");
-		}
 		if (payment.getPayeeId().equals(payment.getMerchantId())) {
 			throw new BusinessException("error_senderAndReciverAreTheSame");
-		}
-		UsersFilter usersFilter = new UsersFilter();
-		List<String> id = new ArrayList<>();
-		id.add(payment.getPayeeId());
-		usersFilter.setIds(id);
-
-		// TODO: CHECK W/ OSAMA use email until now .. after a while we will use
-		// username at regestration to be unique
-		usersFilter.setEmail(payment.getPayeeName());
-
-		List<UserRecord> user = userService.searchUsers(usersFilter);
-		if (user == null || user.size() == 0) {
-			throw new DataNotFoundException("error_userDoesNotExist");
 		}
 
 		List<Wallet> payeeWallet = walletService.searchWalletsByUserAndCurrency(payment.getPayeeId(), payment
@@ -267,11 +254,11 @@ public class PaymentServiceImpl implements PaymentService {
 			throw new BusinessException("error_notEnoughBalance");
 		}
 
-		if (payment.getPaymentId() == null || payment.getAmount() == null || payment.getDate() == null) {
+		if (payment.getAmount() == null || payment.getDate() == null) {
 			throw new BusinessException("error_DataNotComplete");
 		}
 
-		if (paymentRepository.existsByPaymentId(payment.getPaymentId())) {
+		if (payment.getPaymentId() != null && paymentRepository.existsByPaymentId(payment.getPaymentId())) {
 			throw new BusinessException("error_PaymentIdAlreadyExists");
 		}
 	}
@@ -296,6 +283,15 @@ public class PaymentServiceImpl implements PaymentService {
 			payment.setMerchantId(user.getId());
 
 		}
+
+		UsersFilter usersFilter = new UsersFilter();
+		usersFilter.setEmail(payment.getPayeeName());
+		List<UserRecord> user = userService.searchUsers(usersFilter);
+		if (user == null || user.size() == 0) {
+			throw new DataNotFoundException("error_userDoesNotExist");
+		}
+		payment.setPayeeId(user.get(0).getId());
+
 		validate(payment);
 		applyPayment(payment);
 

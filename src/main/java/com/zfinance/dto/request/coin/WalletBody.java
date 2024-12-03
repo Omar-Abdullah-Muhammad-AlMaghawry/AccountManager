@@ -12,5 +12,6 @@ public class WalletBody {
 	private String name;
 	private String issuerId;
 	private String type;
+	private String userId;
 
 }

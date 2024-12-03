@@ -15,9 +15,12 @@ import com.zfinance.dto.response.transfer.TransferCalculateResponse;
 import com.zfinance.dto.response.user.UserRecord;
 import com.zfinance.enums.PaymentToolTypeEnum;
 import com.zfinance.mapper.TargetWalletMapper;
+import com.zfinance.orm.account.BankAccount;
 import com.zfinance.orm.coin.Wallet;
+import com.zfinance.orm.userdefinedtypes.transaction.Target;
 import com.zfinance.orm.userdefinedtypes.transfer.TransfersTransaction;
 import com.zfinance.repositories.transfer.TransferRepository;
+import com.zfinance.services.account.BankAccountService;
 import com.zfinance.services.coin.WalletService;
 import com.zfinance.services.database.sequence.SequenceGeneratorService;
 import com.zfinance.services.external.IssuerService;
@@ -36,6 +39,9 @@ public class TransferServiceImpl implements TransferService {
 	private UserService userService;
 
 	@Autowired
+	private BankAccountService bankAccountService;
+
+	@Autowired
 	private IssuerService issuerService;
 
 	@Autowired
@@ -52,11 +58,12 @@ public class TransferServiceImpl implements TransferService {
 
 		if (transferBody.getPaymentTool() != null) {
 			transfersTransaction.setType(transferBody.getPaymentTool().getType());
-			if (transferBody.getPaymentTool().getType() == PaymentToolTypeEnum.COIN.getCode()) {
+			if (transferBody.getPaymentTool().getType().equals(PaymentToolTypeEnum.COIN.getCode())) {
 				Wallet fromWallet = walletService.getWalletById(transferBody.getPaymentTool().getSrcValue());
 				transfersTransaction.setFrom(TargetWalletMapper.INSTANCE.mapWallet(fromWallet));
 				transfersTransaction.setIssuer(fromWallet.getIssuer());
 
+				// transfer to account
 				if (transferBody.getPaymentTool().getDestValue().contains("@")) {
 					UsersFilter usersFilter = new UsersFilter();
 					usersFilter.setEmail(transferBody.getPaymentTool().getDestValue());
@@ -68,19 +75,34 @@ public class TransferServiceImpl implements TransferService {
 							List<Wallet> toWallets = walletService.getWalletsByUserId(toUser.getId());
 							Wallet toWallet = null;
 							if (!toWallets.isEmpty()) {
-								toWallet = toWallets.stream().filter(wallet -> wallet.getIssuer().equals(fromWallet
-										.getIssuer())).findFirst().orElse(null);
+								// TODO: NEED TO ASK IF WE CHECK ONLY ON THE CURRENCY
+								toWallet = toWallets.stream().filter(wallet -> wallet.getIssuer().getCurrency().equals(
+										fromWallet.getIssuer().getCurrency())).findFirst().orElse(null);
 							}
 							if (toWallet == null) {
+
 								WalletBody walletBody = new WalletBody();
 								walletBody.setIssuerId(fromWallet.getIssuer().getId());
 								walletBody.setName(fromWallet.getIssuer().getCurrency() + " Account");
 								walletBody.setType(null);
+								walletBody.setUserId(toUser.getId());
 								toWallet = walletService.createWallet(walletBody);
 							}
 							transfersTransaction.setTo(TargetWalletMapper.INSTANCE.mapWallet(toWallet));
 						}
 					}
+				}
+				// transfer to bank account
+				else {
+					BankAccount toBankAccount = bankAccountService.viewBankAccountById(transferBody.getPaymentTool()
+							.getDestValue());
+					Target target = new Target();
+					target.setSerial(toBankAccount.getId());
+					target.setIssuer(toBankAccount.getDetails().getIssuer());
+					target.setName(toBankAccount.getDetails().getName());
+					target.setType(toBankAccount.getStatus());
+					// TODO: NEED TO BE COMPLETED
+					transfersTransaction.setTo(target);
 				}
 
 			}
@@ -94,7 +116,12 @@ public class TransferServiceImpl implements TransferService {
 		TransferCalculateResponse transferCalculateResponse = new TransferCalculateResponse();
 		transferCalculateResponse.setTransactionAmount(transferBody.getAmount());
 		transferCalculateResponse.setStatus("done");
+
 		transferCalculateResponse.setSenderAmountPush(transferBody.getAmount());
+		// TODO: NEED TO BE ASKED
+		transferCalculateResponse.setCommissionAmountPush(0.1);
+		transferCalculateResponse.setRecipientAmountPush((transferBody.getAmount() != null ? transferBody.getAmount()
+				: 0) * transferCalculateResponse.getCommissionAmountPush());
 
 		PaymentToolDetails paymentToolDetails = new PaymentToolDetails();
 		paymentToolDetails.setType(transfersTransaction.getType());
@@ -105,12 +132,16 @@ public class TransferServiceImpl implements TransferService {
 			paymentToolDetails.setSymbol(transfersTransaction.getIssuer().getSymbol());
 		}
 
-		if (transfersTransaction.getTo() != null)
+		if (transfersTransaction.getTo() != null) {
 			paymentToolDetails.setDestId(transfersTransaction.getTo().getSerial());
+			paymentToolDetails.setDestValue(transfersTransaction.getTo().getName());
 
-		if (transfersTransaction.getFrom() != null)
+		}
+		if (transfersTransaction.getFrom() != null) {
 			paymentToolDetails.setSrcId(transfersTransaction.getFrom().getSerial());
+			paymentToolDetails.setSrcValue(transfersTransaction.getFrom().getName());
 
+		}
 		transferCalculateResponse.setPaymentToolDetails(paymentToolDetails);
 
 		return transferCalculateResponse;

@@ -236,10 +236,14 @@ public class BankAccountServiceImpl implements BankAccountService {
 	}
 
 	@Override
-	public List<BankAccount> viewBankAccountsByUserId(String UserId) {
+	public List<BankAccount> viewBankAccountsByUserId(String userId) {
 		BankAccountsFilter bankAccountsFilter = new BankAccountsFilter();
-		bankAccountsFilter.setUserIds(Arrays.asList(UserId));
+		bankAccountsFilter.setUserIds(Arrays.asList(userId));
 		return viewBankAccounts(bankAccountsFilter, null);
 	}
 
+	@Override
+	public BankAccount viewBankAccountById(String id) {
+		return bankAccountRepository.findById(id).orElseThrow(() -> new DataNotFoundException(BankAccount.class, id));
+	}
 }
